@@ -148,7 +148,7 @@
 
           <section class="metrics-row">
 
-            <div class="glass-card metric">
+            <div class="glass-card metric clickable-metric" onclick="window.location.href='create-event.html'" title="Click to view/create events">
               <div class="metric-head">
                 <span class="metric-label">Upcoming Events</span>
                 <i class="fa-solid fa-calendar-days metric-icon cyan"></i>
@@ -162,7 +162,7 @@
               </div>
             </div>
 
-            <div class="glass-card metric">
+            <div class="glass-card metric clickable-metric" onclick="window.location.href='event-planner.html'" title="Click to view all 22 tasks & 3-phase planner">
               <div class="metric-head">
                 <span class="metric-label">Tasks Progress</span>
                 <i class="fa-solid fa-list-check metric-icon blue"></i>
@@ -176,10 +176,10 @@
                 <div class="mini-bar-fill" id="tasksBarFill" style="width: 77%;"></div>
               </div>
 
-              <div class="metric-foot" id="valTasksRemaining">5 remaining</div>
+              <div class="metric-foot" id="valTasksRemaining">5 remaining • Click to view board</div>
             </div>
 
-            <div class="glass-card metric">
+            <div class="glass-card metric clickable-metric" onclick="window.location.href='readiness.html'" title="Click to view Mathematical Readiness Audit">
               <div class="metric-head">
                 <span class="metric-label">Event Readiness</span>
                 <i class="fa-solid fa-gauge-high metric-icon purple"></i>
@@ -198,13 +198,13 @@
 
                 <div class="gauge-meta">
                   <div class="gauge-event" id="gaugeEventName">Felicific 2026</div>
-                  <div class="gauge-sub" id="gaugeStatusText">On track</div>
+                  <div class="gauge-sub" id="gaugeStatusText">On track • Click for audit</div>
                 </div>
 
               </div>
             </div>
 
-            <div class="glass-card metric">
+            <div class="glass-card metric clickable-metric" onclick="window.location.href='risk-radar.html'" title="Click to open Live Threat Risk Radar">
               <div class="metric-head">
                 <span class="metric-label">Active Risks</span>
                 <i class="fa-solid fa-triangle-exclamation metric-icon red"></i>
@@ -273,7 +273,7 @@
 
             </div>
 
-            <div class="spotlight-progress">
+            <div class="spotlight-progress" onclick="window.location.href='readiness.html'" style="cursor:pointer;" title="Click to view detailed Readiness Audit">
 
               <div class="spotlight-progress-top">
                 <span>Readiness</span>
@@ -359,14 +359,14 @@
 
           <section class="quick-actions">
 
-            <div class="quick-card" id="qaCreateEvent">
+            <div class="quick-card" id="qaCreateEvent" onclick="window.location.href='create-event.html'" style="cursor:pointer;" title="Open Create Event Form">
               <div class="quick-icon">
                 <i class="fa-solid fa-plus"></i>
               </div>
               <div class="quick-label">Create Event</div>
             </div>
 
-            <div class="quick-card" id="qaGeneratePlan">
+            <div class="quick-card" id="qaGeneratePlan" onclick="window.location.href='event-planner.html'" style="cursor:pointer;" title="Open 3-Phase Event Planner">
               <div class="quick-icon">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
               </div>
@@ -446,7 +446,7 @@
               <strong>94%</strong>.
             </p>
 
-            <button class="btn-ghost full" id="btnTakeInsightAction">
+            <button class="btn-ghost full" id="btnTakeInsightAction" onclick="window.location.href='vendors.html'" style="cursor:pointer;">
               Take Action
               <i class="fa-solid fa-arrow-right"></i>
             </button>

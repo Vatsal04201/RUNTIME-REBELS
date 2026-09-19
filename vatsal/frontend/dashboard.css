@@ -439,6 +439,18 @@ body {
   justify-content: space-between;
 }
 
+.clickable-metric {
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-metric:hover {
+  transform: translateY(-3px);
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 240, 255, 0.12);
+}
+
 .metric-head {
   display: flex;
   align-items: center;

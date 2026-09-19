@@ -19,10 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // Main data loader
 async function loadDashboardData() {
   try {
-    const [summaryRes, tasksRes, activityRes] = await Promise.all([
+    const [summaryRes, tasksRes, activityRes, eventsRes] = await Promise.all([
       fetch(`${API_BASE}/api/dashboard/summary`),
       fetch(`${API_BASE}/api/tasks`),
-      fetch(`${API_BASE}/api/activity`)
+      fetch(`${API_BASE}/api/activity`),
+      fetch(`${API_BASE}/api/events`)
     ]);
 
     if (!summaryRes.ok || !tasksRes.ok || !activityRes.ok) {
@@ -32,6 +33,7 @@ async function loadDashboardData() {
     const summaryData = await summaryRes.json();
     const tasksData = await tasksRes.json();
     const activityData = await activityRes.json();
+    const eventsData = eventsRes.ok ? await eventsRes.json() : { success: false };
 
     hideConnectionBanner();
 
@@ -40,13 +42,18 @@ async function loadDashboardData() {
       renderSummary(summaryData.data);
     }
 
-    // 2. Update Tasks & Deadlines
+    // 2. Update Upcoming Club Events
+    if (eventsData.success && Array.isArray(eventsData.data)) {
+      renderAllEvents(eventsData.data);
+    }
+
+    // 3. Update Tasks & Deadlines
     if (tasksData.success) {
       renderTasks(tasksData.data);
       renderDeadlines(tasksData.data);
     }
 
-    // 3. Update Activity Feed
+    // 4. Update Activity Feed
     if (activityData.success) {
       renderActivity(activityData.data);
     }
@@ -677,5 +684,82 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// Render All Upcoming Events Grid
+function renderAllEvents(events) {
+  const container = document.getElementById('eventsListContainer');
+  const countSub = document.getElementById('eventsCountSub');
+  if (!container) return;
+
+  if (countSub) {
+    countSub.textContent = `${events.length} active & upcoming club event${events.length === 1 ? '' : 's'} managed by ClubOps AI`;
+  }
+
+  if (!events || events.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 28px; background: rgba(255,255,255,0.02); border: 1px dashed var(--border-subtle); border-radius: var(--radius-md); color: var(--text-muted);">
+        <i class="fa-solid fa-calendar-plus" style="font-size: 28px; color: var(--accent-cyan); margin-bottom: 8px; display: block;"></i>
+        No upcoming events created yet. <a href="create-event.html" style="color: var(--accent-cyan); text-decoration: underline;">Click here to create an event</a>!
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = events.map(ev => {
+    let statusClass = 'low';
+    let statusBg = 'rgba(6, 182, 212, 0.12)';
+    let statusColor = 'var(--accent-cyan)';
+    let statusLabel = ev.status || 'Upcoming';
+
+    if (/live/i.test(ev.status)) {
+      statusClass = 'high';
+      statusBg = 'rgba(168, 85, 247, 0.15)';
+      statusColor = 'var(--accent-purple)';
+    } else if (/prep/i.test(ev.status)) {
+      statusClass = 'medium';
+      statusBg = 'rgba(245, 158, 11, 0.15)';
+      statusColor = 'var(--accent-amber)';
+    } else if (/upcoming/i.test(ev.status)) {
+      statusClass = 'low';
+      statusBg = 'rgba(16, 185, 129, 0.15)';
+      statusColor = 'var(--accent-green)';
+    }
+
+    return `
+      <div class="glass-card" style="padding: 18px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; cursor: pointer;" onclick="window.location.href='event-planner.html'" onmouseover="this.style.borderColor='var(--accent-cyan)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)'; this.style.transform='none'">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+              ${escapeHtml(ev.type || 'Fest')}
+            </span>
+            <span style="font-size: 0.72rem; font-weight: 700; color: ${statusColor}; background: ${statusBg}; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px;">
+              <span class="pulse-dot" style="width: 5px; height: 5px; background: ${statusColor};"></span>
+              ${escapeHtml(statusLabel)}
+            </span>
+          </div>
+
+          <h4 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.3;">
+            ${escapeHtml(ev.name)}
+          </h4>
+
+          <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px;">
+            <div><i class="fa-solid fa-calendar" style="color: var(--accent-cyan); width: 16px;"></i> ${escapeHtml(ev.date)} • ${escapeHtml(ev.startTime || '6:00 PM')}</div>
+            <div><i class="fa-solid fa-location-dot" style="color: var(--accent-purple); width: 16px;"></i> ${escapeHtml(ev.venue || 'Campus Venue')}</div>
+            <div><i class="fa-solid fa-users" style="color: var(--accent-blue); width: 16px;"></i> ${ev.guests || 100} guests • ${ev.volunteers || 20} volunteers</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 12px; margin-top: 6px;">
+          <span style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+            Open Planner <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
+          </span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+            ${ev.budget ? '₹' + Number(ev.budget).toLocaleString('en-IN') : ''}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 

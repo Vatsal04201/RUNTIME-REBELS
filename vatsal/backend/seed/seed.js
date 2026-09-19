@@ -264,18 +264,18 @@ const seedDatabase = async (force = false) => {
     `, [m.id, m.eventName, m.year, m.category, m.title, m.content, m.cost, m.tags]);
   }
 
-  // 9. Seed Sample Post-Event Report (for Felicific 2025 retrospective)
+  // 9. Seed Sample Post-Event Reports
   await run(`
     INSERT INTO reports (id, eventId, title, summary, stats, issues, recommendations)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `, [
-    'rep-2025',
-    'felicific-2025',
-    'Felicific 2025 — Official Post-Event Retrospective',
-    'Felicific 2025 completed with 88% overall success rating. Total registered footfall was 84 delegates. Highlights included on-time inauguration, flawless dance performances, and zero power disruptions.',
-    JSON.stringify({ guestsAttended: '84/100', volunteersOnDuty: '19/20', tasksCompleted: '21/22', totalBudgetSpent: '₹44,500 / ₹50,000' }),
-    'Main Stage 2 soundcheck was delayed by 35 minutes due to missing 6.35mm jack converter. Backup microphone line had mild feedback during the faculty address.',
-    '1. Enforce sound vendor equipment check at 2:00 PM on event day.\n2. Keep a separate buffer pool of 3 volunteers specifically for entrance QR fast-track queue.\n3. Pre-print 10 blank certificate templates for spot winners.'
+    'rep-2026',
+    'felicific-2026',
+    'Felicific 2026 — Comprehensive Retrospective Report',
+    'The annual flagship event "Felicific 2026" was conducted successfully on 25 September 2026 at DDU Campus. The event maintained strict administrative compliance, zero electrical blackouts, and achieved an overall attendee satisfaction score of 92%. Fast-track QR check-in desks processed arrival crowds in under 90 seconds per delegate.',
+    JSON.stringify({ guestsAttended: '82/100', volunteersTurnout: '18/20', tasksCompleted: '17/22', vendorsContracted: '6/6' }),
+    '1. Stage 2 Sound system delay of 25 minutes due to unconfirmed secondary connector line.\n2. Peak entrance congestion between 5:45 PM - 6:15 PM.\n3. Spot certificate printing demand exceeded pre-printed allotment by 12 certificates.',
+    '1. Pre-test secondary sound lines at least 3 hours prior to inaugural address.\n2. Deploy a permanent buffer reserve of 3 volunteers at Registration Entrance Gate.\n3. Institute digital verifiable e-certificates via QR code to eliminate on-site printing bottlenecks.'
   ]);
 
   console.log('Database seeding successfully completed!');

@@ -148,7 +148,7 @@
 
           <section class="metrics-row">
 
-            <div class="glass-card metric clickable-metric" onclick="window.location.href='create-event.html'" title="Click to view/create events">
+            <div class="glass-card metric clickable-metric" onclick="document.getElementById('upcomingEventsSection')?.scrollIntoView({behavior:'smooth'})" title="Click to view all upcoming club events">
               <div class="metric-head">
                 <span class="metric-label">Upcoming Events</span>
                 <i class="fa-solid fa-calendar-days metric-icon cyan"></i>
@@ -298,6 +298,23 @@
               </a>
             </div>
 
+          </section>
+
+          <!-- All Upcoming Events Section -->
+          <section class="glass-card events-panel" id="upcomingEventsSection">
+            <div class="panel-head">
+              <div>
+                <h3 class="panel-title"><i class="fa-solid fa-calendar-days" style="color:var(--accent-cyan); margin-right:8px;"></i> Upcoming Club Events</h3>
+                <p class="panel-sub" id="eventsCountSub">All active and upcoming college fests managed by ClubOps AI</p>
+              </div>
+              <a href="create-event.html" class="btn-primary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-weight:600;">
+                <i class="fa-solid fa-plus"></i> Create Event
+              </a>
+            </div>
+
+            <div class="events-grid" id="eventsListContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:16px;">
+              <!-- Dynamically populated from /api/events via dashboard.js -->
+            </div>
           </section>
 
           <section class="glass-card tasks-panel">

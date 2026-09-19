@@ -255,6 +255,22 @@
           </div>
         </div>
       </div>
+
+      <!-- Upcoming & Active Club Events Section -->
+      <section class="card card-glow" style="margin-top: 32px;" id="upcomingEventsListSection">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-calendar-days" style="color:var(--cyan);"></i> Upcoming & Active Club Events</div>
+            <span class="card-sub" id="createEventListCount">All events registered in ClubOps AI</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadUpcomingEventsList()"><i class="fa-solid fa-rotate"></i> Refresh Events</button>
+        </div>
+
+        <div id="createEventsListGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:16px;">
+          <!-- Loaded dynamically from /api/events -->
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -313,7 +329,7 @@
           registrationLead,
           stageLead,
           services,
-          status: 'Planning'
+          status: 'Upcoming'
         });
 
         // Also fetch AI starter plan
@@ -333,11 +349,64 @@
           `;
         }
 
+        // Refresh upcoming events list
+        loadUpcomingEventsList();
+
       } catch (err) {
         ClubOps.aiLoader.hide();
         ClubOps.toast('Error creating event: ' + err.message, 'error');
       }
     }
+
+    async function loadUpcomingEventsList() {
+      try {
+        const res = await ClubOps.api.get('/api/events');
+        if (res.success && Array.isArray(res.data)) {
+          const container = document.getElementById('createEventsListGrid');
+          const countEl = document.getElementById('createEventListCount');
+          if (countEl) countEl.textContent = `${res.data.length} registered events`;
+          if (!container) return;
+
+          if (res.data.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-2); padding:20px; text-align:center; grid-column:1/-1;">No events created yet. Use the form above to add your first event!</div>';
+            return;
+          }
+
+          container.innerHTML = res.data.map(ev => {
+            let badgeColor = 'badge-blue';
+            let statusLabel = ev.status || 'Upcoming';
+            if (/live/i.test(ev.status)) badgeColor = 'badge-purple';
+            else if (/upcoming/i.test(ev.status)) badgeColor = 'badge-green';
+            else if (/prep/i.test(ev.status)) badgeColor = 'badge-amber';
+
+            return `
+              <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                    <span class="badge ${badgeColor}">${ClubOps.escapeHtml(statusLabel)}</span>
+                    <span style="font-size:12px; color:var(--text-2);">${ClubOps.escapeHtml(ev.type || 'Fest')}</span>
+                  </div>
+                  <h3 style="font-size:16px; color:var(--text-0); margin-bottom:8px;">${ClubOps.escapeHtml(ev.name)}</h3>
+                  <div style="font-size:12.5px; color:var(--text-1); display:flex; flex-direction:column; gap:5px; margin-bottom:14px;">
+                    <div><i class="fa-solid fa-calendar" style="color:var(--cyan); width:16px;"></i> ${ClubOps.escapeHtml(ev.date)} • ${ClubOps.escapeHtml(ev.startTime || '6:00 PM')}</div>
+                    <div><i class="fa-solid fa-location-dot" style="color:var(--purple); width:16px;"></i> ${ClubOps.escapeHtml(ev.venue || 'Campus Venue')}</div>
+                    <div><i class="fa-solid fa-users" style="color:var(--blue); width:16px;"></i> ${ev.guests || 100} attendees • ${ev.volunteers || 20} volunteers</div>
+                  </div>
+                </div>
+                <div style="border-top:1px solid var(--border); padding-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                  <a href="event-planner.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrow-right"></i> Open Planner</a>
+                  <span style="font-size:12px; color:var(--text-2);">${ev.budget ? ClubOps.formatCurrency(ev.budget) : ''}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) {
+        console.error('Error loading events list:', e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUpcomingEventsList);
   </script>
 </body>
 </html>

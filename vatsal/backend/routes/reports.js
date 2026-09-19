@@ -2,6 +2,30 @@ const express = require('express');
 const router = express.Router();
 const { run, get, all } = require('../database/database');
 
+// GET /api/reports - List reports or query by ?eventId=...
+router.get('/', async (req, res) => {
+  try {
+    const { eventId } = req.query;
+    let sql = 'SELECT * FROM reports';
+    let params = [];
+    if (eventId) {
+      sql += ' WHERE eventId = ?';
+      params.push(eventId);
+    }
+    sql += ' ORDER BY generatedAt DESC';
+    const reports = await all(sql, params);
+    res.json({
+      success: true,
+      data: reports.map(r => ({
+        ...r,
+        stats: JSON.parse(r.stats || '{}')
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // GET /api/reports/:eventId - Get event report
 router.get('/:eventId', async (req, res) => {
   try {

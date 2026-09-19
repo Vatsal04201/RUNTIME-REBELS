@@ -60,11 +60,14 @@ router.get('/', async (req, res) => {
       insightText += ` Excellent job! All critical vendor and logistical assets are confirmed.`;
     }
 
+    const upcomingEvents = events.filter(e => (e.status || '').toLowerCase() !== 'completed');
+    const nextUpcoming = events.find(e => e.id !== featuredEvent?.id && (e.status || '').toLowerCase() !== 'completed') || featuredEvent;
+
     res.json({
       success: true,
       data: {
-        upcomingEventsCount: events.length,
-        nextEventName: featuredEvent ? featuredEvent.name : 'Felicific 2026',
+        upcomingEventsCount: upcomingEvents.length,
+        nextEventName: nextUpcoming ? nextUpcoming.name : 'TechFest 2026',
         featuredEvent: featuredEvent ? {
           id: featuredEvent.id,
           name: featuredEvent.name,

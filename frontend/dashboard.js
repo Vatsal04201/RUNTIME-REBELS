@@ -708,22 +708,25 @@ function renderAllEvents(events) {
 
   container.innerHTML = events.map(ev => {
     let statusClass = 'low';
-    let statusBg = 'rgba(6, 182, 212, 0.12)';
-    let statusColor = 'var(--accent-cyan)';
-    let statusLabel = ev.status || 'Upcoming';
+    let statusBg = 'rgba(16, 185, 129, 0.15)';
+    let statusColor = 'var(--accent-green)';
+    let statusLabel = 'Upcoming';
 
     if (/live/i.test(ev.status)) {
       statusClass = 'high';
       statusBg = 'rgba(168, 85, 247, 0.15)';
       statusColor = 'var(--accent-purple)';
+      statusLabel = 'LIVE';
     } else if (/prep/i.test(ev.status)) {
       statusClass = 'medium';
       statusBg = 'rgba(245, 158, 11, 0.15)';
       statusColor = 'var(--accent-amber)';
-    } else if (/upcoming/i.test(ev.status)) {
+      statusLabel = 'Prep Phase';
+    } else {
       statusClass = 'low';
       statusBg = 'rgba(16, 185, 129, 0.15)';
       statusColor = 'var(--accent-green)';
+      statusLabel = ev.status && !/plan/i.test(ev.status) ? ev.status : 'Upcoming';
     }
 
     return `

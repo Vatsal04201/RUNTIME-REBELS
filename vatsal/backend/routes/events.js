@@ -41,7 +41,7 @@ router.post('/', async (req, res) => {
       budget = 20000,
       description = '',
       requirements = '',
-      status = 'Planning',
+      status = 'Upcoming',
       photographyLead,
       soundLead,
       registrationLead,
@@ -174,4 +174,21 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/events/:id - Delete event
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await run('DELETE FROM events WHERE id = ?', [id]);
+    await run('DELETE FROM tasks WHERE eventId = ?', [id]);
+    await run('DELETE FROM volunteers WHERE eventId = ?', [id]);
+    await run('DELETE FROM vendors WHERE eventId = ?', [id]);
+    await run('DELETE FROM risks WHERE eventId = ?', [id]);
+    await run('DELETE FROM activity WHERE eventId = ?', [id]);
+    res.json({ success: true, message: `Event ${id} deleted successfully` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
+

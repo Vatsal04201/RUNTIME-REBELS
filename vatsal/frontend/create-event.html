@@ -373,11 +373,18 @@
           }
 
           container.innerHTML = res.data.map(ev => {
-            let badgeColor = 'badge-blue';
-            let statusLabel = ev.status || 'Upcoming';
-            if (/live/i.test(ev.status)) badgeColor = 'badge-purple';
-            else if (/upcoming/i.test(ev.status)) badgeColor = 'badge-green';
-            else if (/prep/i.test(ev.status)) badgeColor = 'badge-amber';
+            let badgeColor = 'badge-green';
+            let statusLabel = 'Upcoming';
+            if (/live/i.test(ev.status)) {
+              badgeColor = 'badge-purple';
+              statusLabel = 'LIVE';
+            } else if (/prep/i.test(ev.status)) {
+              badgeColor = 'badge-amber';
+              statusLabel = 'Prep Phase';
+            } else {
+              badgeColor = 'badge-green';
+              statusLabel = ev.status && !/plan/i.test(ev.status) ? ev.status : 'Upcoming';
+            }
 
             return `
               <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border); display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">

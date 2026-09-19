@@ -249,10 +249,65 @@ Return STRICTLY a JSON object:
   return null;
 }
 
+/**
+ * 5. Free Multimodal Speech-to-Text (STT) Audio Transcription
+ */
+async function transcribeAudioWithGemini(audioBase64, mimeType = 'audio/mp3') {
+  const prompt = `You are an expert speech-to-text audio transcription engine for university club operations.
+Transcribe this audio recording accurately word-for-word into clear, readable meeting notes.
+Preserve entity names, student names (e.g. Rahul, Vrunda, Helli, Sneha, Pooja, Arjun, Amit, Kunal, Ishita), deadlines, equipment names, and operational action items.
+Return ONLY the clean transcript text without preamble or markdown quotation blocks.`;
+
+  for (const model of MODELS) {
+    try {
+      const endpoint = `${BASE_URL}/models/${model}:generateContent?key=${getApiKey()}`;
+      const body = {
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: mimeType || 'audio/mp3',
+                  data: audioBase64
+                }
+              },
+              {
+                text: prompt
+              }
+            ]
+          }
+        ]
+      };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.warn(`[Gemini STT ${model}] ${response.status}: ${errText.slice(0, 150)}. Trying fallback...`);
+        continue;
+      }
+
+      const data = await response.json();
+      const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (candidateText && candidateText.trim()) {
+        return candidateText.trim();
+      }
+    } catch (err) {
+      console.warn(`[Gemini STT Service Error on ${model}]:`, err.message);
+    }
+  }
+  return null;
+}
+
 module.exports = {
   callGemini,
   generateEventTasksWithGemini,
   generateMasterPlanWithGemini,
   extractTasksFromTranscriptWithGemini,
-  generateDocumentWithGemini
+  generateDocumentWithGemini,
+  transcribeAudioWithGemini
 };

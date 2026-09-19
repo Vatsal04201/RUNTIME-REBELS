@@ -328,6 +328,28 @@ async function testDashboardDomIntegrity() {
   }
 }
 
+async function testMeetingTasksAudioFeature() {
+  console.log('\n--- 6. TESTING MEETING AUDIO IMPORT & STT INTEGRITY ---');
+  const meetingHtml = fs.readFileSync(path.join(__dirname, '../frontend/meeting-tasks.html'), 'utf8');
+
+  const requiredAudioIds = [
+    'audioDropZone',
+    'audioFileInput',
+    'audioPreviewPlayer',
+    'btnLiveMic',
+    'btnTranscribe',
+    'transcriptInput',
+    'eventSelect',
+    'btnExtract',
+    'extractionResults'
+  ];
+
+  for (const id of requiredAudioIds) {
+    const exists = meetingHtml.includes(`id="${id}"`);
+    assert(exists, `meeting-tasks.html contains audio/STT element id="${id}"`);
+  }
+}
+
 async function run() {
   console.log('====================================================');
   console.log('   CLUBOPS AI COMPLETE WEBSITE AUTOMATED TEST SUITE  ');
@@ -338,6 +360,7 @@ async function run() {
   await testRestApis();
   await testAiActions();
   await testDashboardDomIntegrity();
+  await testMeetingTasksAudioFeature();
 
   console.log('\n====================================================');
   console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

@@ -10,8 +10,9 @@ const PORT = process.env.PORT || 5000;
 // Enable CORS
 app.use(cors());
 
-// Parse JSON request bodies
-app.use(express.json());
+// Parse JSON and urlencoded request bodies with 50mb limit for audio data
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static frontend files
 const frontendPath = path.join(__dirname, '..', 'frontend');

@@ -1,0 +1,22 @@
+[
+  { "id": "vol-1", "name": "Vrunda Patel", "role": "Lead Coordinator", "department": "Operations", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-2", "name": "Rahul Sharma", "role": "Technical Lead", "department": "Audio & Visual", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-3", "name": "Helli Mehta", "role": "Event Lead", "department": "Executive", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-4", "name": "Amit Shah", "role": "Registration Desk", "department": "Front Desk", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-5", "name": "Priya Nair", "role": "Social Media & PR", "department": "Media", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-6", "name": "Kunal Joshi", "role": "Finance Desk", "department": "Treasury", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-7", "name": "Suresh Kumar", "role": "Crowd Control", "department": "Security", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-8", "name": "Pooja Trivedi", "role": "First Aid Lead", "department": "Safety", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-9", "name": "Kavya Desai", "role": "VIP Hospitality", "department": "Hospitality", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-10", "name": "Aniket Verma", "role": "Registration Desk", "department": "Front Desk", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-11", "name": "Rohan Gupta", "role": "Food & Beverage", "department": "Logistics", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-12", "name": "Sneha Reddy", "role": "VIP Hospitality", "department": "Hospitality", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-13", "name": "Manish Tiwari", "role": "Crowd Control", "department": "Security", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-14", "name": "Deepa Dave", "role": "Stage Green Room", "department": "Hospitality", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-15", "name": "Yash Solanki", "role": "Auditorium Ushero", "department": "Crowd", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-16", "name": "Neha Makwana", "role": "Photographer Guide", "department": "Media", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-17", "name": "Jatin Bhavsar", "role": "Parking Lead", "department": "Security", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-18", "name": "Tanvi Rao", "role": "Help Desk", "department": "Front Desk", "status": "assigned", "eventId": "felicific-2026" },
+  { "id": "vol-19", "name": null, "role": "Stage Management", "department": "Stage Management", "status": "unassigned", "eventId": "felicific-2026" },
+  { "id": "vol-20", "name": null, "role": "Stage Management", "department": "Stage Management", "status": "unassigned", "eventId": "felicific-2026" }
+]

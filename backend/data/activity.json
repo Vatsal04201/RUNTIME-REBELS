@@ -1,0 +1,44 @@
+[
+  {
+    "id": "act-1789810983437",
+    "text": "<strong>Rahul</strong> completed task: \"Arrange backup microphone\"",
+    "time": "Just now",
+    "dot": "cyan",
+    "timestamp": 1789810983438
+  },
+  {
+    "id": "act-1",
+    "text": "<strong>Vrunda</strong> completed task",
+    "time": "2 min ago",
+    "dot": "cyan",
+    "timestamp": 1789808400000
+  },
+  {
+    "id": "act-2",
+    "text": "<strong>AI</strong> detected missing mic",
+    "time": "14 min ago",
+    "dot": "red",
+    "timestamp": 1789807680000
+  },
+  {
+    "id": "act-3",
+    "text": "<strong>3 certificates</strong> generated",
+    "time": "32 min ago",
+    "dot": "purple",
+    "timestamp": 1789806600000
+  },
+  {
+    "id": "act-4",
+    "text": "<strong>Rahul</strong> flagged backup mic",
+    "time": "1 hr ago",
+    "dot": "amber",
+    "timestamp": 1789804800000
+  },
+  {
+    "id": "act-5",
+    "text": "<strong>Helli</strong> updated readiness to 87%",
+    "time": "2 hr ago",
+    "dot": "cyan",
+    "timestamp": 1789801200000
+  }
+]

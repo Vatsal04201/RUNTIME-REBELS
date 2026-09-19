@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- Server connection toast / banner -->
+  <div id="connection-banner" class="connection-banner" style="display: none;"></div>
+
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="index.html" class="logo">
+          <i class="fa-solid fa-cube"></i>
+          <span>ClubOps</span>
+          <span class="badge">AI</span>
+        </a>
+      </div>
+
+      <nav class="side-nav">
+        <div class="nav-group-label">Workspace</div>
+
+        <a href="#" class="nav-item active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard</span>
+          <span class="nav-glow"></span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>Events</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Tasks</span>
+          <span class="nav-count" id="navTaskCount">5</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Volunteers</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-ticket"></i>
+          <span>Guests</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-building"></i>
+          <span>Vendors</span>
+        </a>
+
+        <div class="nav-group-label">Intelligence</div>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <span>Risk Radar</span>
+          <span class="nav-count alert" id="navRiskCount">3</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-clapperboard"></i>
+          <span>Event Day Mode</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-brain"></i>
+          <span>Club Memory</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </a>
+
+        <div class="user-card">
+          <div class="avatar">H</div>
+          <div class="user-info">
+            <div class="user-name">Helli</div>
+            <div class="user-role">Club Organizer</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="greeting">
+            Good morning, Helli <span class="wave">👋</span>
+          </h1>
+
+          <p class="greeting-sub">
+            Here's what needs your attention today for
+            <span class="accent-text" id="topbarEventName">Felicific 2026</span>.
+          </p>
+        </div>
+
+        <div class="topbar-right">
+
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search events, tasks, vendors…">
+            <span class="kbd">⌘K</span>
+          </div>
+
+          <div class="status-ticker">
+            <span class="pulse-dot"></span>
+            System Operational
+          </div>
+
+          <button class="icon-btn" aria-label="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span class="ping-dot"></span>
+          </button>
+
+          <div class="avatar avatar-sm">H</div>
+
+        </div>
+      </header>
+
+      <div class="content-grid">
+
+        <div class="primary-col">
+
+          <section class="metrics-row">
+
+            <div class="glass-card metric">
+              <div class="metric-head">
+                <span class="metric-label">Upcoming Events</span>
+                <i class="fa-solid fa-calendar-days metric-icon cyan"></i>
+              </div>
+
+              <div class="metric-value" id="valUpcomingEvents">2</div>
+
+              <div class="metric-foot">
+                Next:
+                <span class="accent-text" id="nextEventFoot">Felicific 2026</span>
+              </div>
+            </div>
+
+            <div class="glass-card metric">
+              <div class="metric-head">
+                <span class="metric-label">Tasks Progress</span>
+                <i class="fa-solid fa-list-check metric-icon blue"></i>
+              </div>
+
+              <div class="metric-value" id="valTasksFraction">
+                <span id="valTasksCompleted">17</span><span id="valTasksTotal">/22</span>
+              </div>
+
+              <div class="mini-bar">
+                <div class="mini-bar-fill" id="tasksBarFill" style="width: 77%;"></div>
+              </div>
+
+              <div class="metric-foot" id="valTasksRemaining">5 remaining</div>
+            </div>
+
+            <div class="glass-card metric">
+              <div class="metric-head">
+                <span class="metric-label">Event Readiness</span>
+                <i class="fa-solid fa-gauge-high metric-icon purple"></i>
+              </div>
+
+              <div class="metric-gauge-row">
+
+                <div class="gauge-wrap">
+                  <svg viewBox="0 0 60 60" class="gauge">
+                    <circle cx="30" cy="30" r="24" class="gauge-bg"></circle>
+                    <circle cx="30" cy="30" r="24" class="gauge-fill" id="gaugeCircleFill" style="stroke-dashoffset: 19.6;"></circle>
+                  </svg>
+
+                  <div class="gauge-value" id="valGaugePct">87%</div>
+                </div>
+
+                <div class="gauge-meta">
+                  <div class="gauge-event" id="gaugeEventName">Felicific 2026</div>
+                  <div class="gauge-sub" id="gaugeStatusText">On track</div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="glass-card metric">
+              <div class="metric-head">
+                <span class="metric-label">Active Risks</span>
+                <i class="fa-solid fa-triangle-exclamation metric-icon red"></i>
+              </div>
+
+              <div class="metric-value" id="valActiveRisksCount">3</div>
+
+              <div class="risk-pills" id="riskPillsSummary">
+                <span class="risk-pill high" id="pillHighCount">1 High</span>
+                <span class="risk-pill medium" id="pillMedCount">2 Medium</span>
+              </div>
+            </div>
+
+          </section>
+
+          <section class="glass-card spotlight">
+
+            <div class="spotlight-glow"></div>
+
+            <div class="spotlight-head">
+
+              <div>
+                <div class="spotlight-label">
+                  <i class="fa-solid fa-star"></i>
+                  Featured Event
+                </div>
+
+                <h2 class="spotlight-title" id="spotlightTitle">
+                  Felicific 2026
+                </h2>
+              </div>
+
+              <span class="live-pill" id="spotlightLivePill">
+                <span class="pulse-dot"></span>
+                EVENT LIVE
+              </span>
+
+            </div>
+
+            <div class="spotlight-details">
+
+              <div class="detail" id="spotlightDate">
+                <i class="fa-solid fa-calendar"></i>
+                25 September 2026
+              </div>
+
+              <div class="detail" id="spotlightTime">
+                <i class="fa-solid fa-clock"></i>
+                6:00 PM
+              </div>
+
+              <div class="detail" id="spotlightLocation">
+                <i class="fa-solid fa-location-dot"></i>
+                DDU Campus
+              </div>
+
+              <div class="detail" id="spotlightGuests">
+                <i class="fa-solid fa-users"></i>
+                100 Guests
+              </div>
+
+              <div class="detail" id="spotlightVolunteers">
+                <i class="fa-solid fa-handshake"></i>
+                20 Volunteers
+              </div>
+
+            </div>
+
+            <div class="spotlight-progress">
+
+              <div class="spotlight-progress-top">
+                <span>Readiness</span>
+                <span class="accent-text" id="spotlightReadinessText">87% completed</span>
+              </div>
+
+              <div class="readiness-bar">
+                <div class="readiness-fill" id="spotlightReadinessBar" style="width: 87%;"></div>
+              </div>
+
+            </div>
+
+            <button class="btn-primary" id="btnOpenOps">
+              Open Event Operations
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+          </section>
+
+          <section class="glass-card tasks-panel">
+
+            <div class="panel-head">
+
+              <div>
+                <h3 class="panel-title">Today's Tasks</h3>
+                <p class="panel-sub" id="tasksAttentionText">3 tasks need your attention</p>
+              </div>
+
+              <a href="#" class="panel-link" id="btnViewAllTasks">
+                View all
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+
+            </div>
+
+            <div class="task-list" id="taskListContainer">
+              <!-- Dynamically populated via dashboard.js from /api/tasks -->
+            </div>
+
+          </section>
+
+          <section class="glass-card ai-panel">
+
+            <div class="ai-panel-head">
+
+              <div class="ai-title-wrap">
+
+                <div class="ai-icon">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+
+                <div>
+                  <h3 class="panel-title">
+                    AI Attention Engine
+                  </h3>
+
+                  <p class="panel-sub">
+                    Proactive insights detected by ClubOps AI
+                  </p>
+                </div>
+
+              </div>
+
+              <span class="ai-live">
+                <span class="pulse-dot"></span>
+                Live
+              </span>
+
+            </div>
+
+            <div id="aiAlertsContainer">
+              <!-- Dynamically populated via dashboard.js from /api/risks -->
+            </div>
+
+          </section>
+
+          <section class="quick-actions">
+
+            <div class="quick-card" id="qaCreateEvent">
+              <div class="quick-icon">
+                <i class="fa-solid fa-plus"></i>
+              </div>
+              <div class="quick-label">Create Event</div>
+            </div>
+
+            <div class="quick-card" id="qaGeneratePlan">
+              <div class="quick-icon">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div class="quick-label">Generate Event Plan</div>
+            </div>
+
+            <div class="quick-card" id="qaConvertMeeting">
+              <div class="quick-icon">
+                <i class="fa-solid fa-microphone-lines"></i>
+              </div>
+              <div class="quick-label">Convert Meeting to Tasks</div>
+            </div>
+
+            <div class="quick-card" id="qaAiActions">
+              <div class="quick-icon">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <div class="quick-label">One-Click AI Actions</div>
+            </div>
+
+          </section>
+
+        </div>
+
+        <aside class="secondary-col">
+
+          <section class="glass-card feed-panel">
+
+            <div class="panel-head">
+
+              <h3 class="panel-title">
+                Live Activity
+              </h3>
+
+              <span class="live-pill small">
+                <span class="pulse-dot"></span>
+                LIVE
+              </span>
+
+            </div>
+
+            <div class="activity-list" id="activityListContainer">
+              <!-- Dynamically populated from /api/activity -->
+            </div>
+
+          </section>
+
+          <section class="glass-card feed-panel">
+
+            <div class="panel-head">
+              <h3 class="panel-title">
+                Upcoming Deadlines
+              </h3>
+            </div>
+
+            <div class="deadline-list" id="deadlineListContainer">
+              <!-- Dynamically populated from pending tasks / deadlines -->
+            </div>
+
+          </section>
+
+          <section class="glass-card insight-card">
+
+            <div class="insight-glow"></div>
+
+            <div class="insight-icon">
+              <i class="fa-solid fa-sparkles"></i>
+            </div>
+
+            <div class="insight-title">
+              AI Insight
+            </div>
+
+            <p class="insight-text" id="aiInsightText">
+              You're <strong>87%</strong> ready.
+              Confirming the sound vendor will push readiness to
+              <strong>94%</strong>.
+            </p>
+
+            <button class="btn-ghost full" id="btnTakeInsightAction">
+              Take Action
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+          </section>
+
+        </aside>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

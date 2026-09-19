@@ -1,0 +1,6 @@
+[
+  { "id": "gst-1", "name": "Prof. S. K. Joshi", "designation": "Dean of Student Affairs", "category": "VIP", "status": "confirmed", "eventId": "felicific-2026" },
+  { "id": "gst-2", "name": "Dr. Ramesh Trivedi", "designation": "Head of Department (CSE)", "category": "VIP", "status": "confirmed", "eventId": "felicific-2026" },
+  { "id": "gst-3", "name": "Mrs. Anita Desai", "designation": "Distinguished Alumni Keynote", "category": "VIP", "status": "confirmed", "eventId": "felicific-2026" },
+  { "id": "gst-4", "name": "Student Attendees & Delegations", "designation": "Registered Students", "count": 97, "category": "General", "status": "confirmed", "eventId": "felicific-2026" }
+]

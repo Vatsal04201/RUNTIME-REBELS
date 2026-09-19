@@ -1,0 +1,205 @@
+[
+  {
+    "id": "task-1",
+    "name": "Confirm photographer",
+    "assignee": "Vrunda",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Today",
+    "isToday": true,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-2",
+    "name": "Arrange backup microphone",
+    "assignee": "Rahul",
+    "status": "pending",
+    "priority": "high",
+    "dueDate": "Today",
+    "isToday": true,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-3",
+    "name": "Print permission certificates",
+    "assignee": "Helli",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "Tomorrow",
+    "isToday": true,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-4",
+    "name": "Confirm sound vendor",
+    "assignee": "Rahul",
+    "status": "pending",
+    "priority": "high",
+    "dueDate": "Today",
+    "isToday": false,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-5",
+    "name": "Final volunteer briefing",
+    "assignee": "Vrunda",
+    "status": "pending",
+    "priority": "low",
+    "dueDate": "Sep 23",
+    "isToday": false,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-6",
+    "name": "Draft fest budget spreadsheet",
+    "assignee": "Kunal",
+    "status": "completed",
+    "priority": "high",
+    "dueDate": "Sep 10",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-7",
+    "name": "Book main auditorium with Dean office",
+    "assignee": "Helli",
+    "status": "completed",
+    "priority": "high",
+    "dueDate": "Sep 12",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-8",
+    "name": "Submit fire safety clearance form",
+    "assignee": "Rahul",
+    "status": "completed",
+    "priority": "medium",
+    "dueDate": "Sep 14",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-9",
+    "name": "Design fest posters and banners",
+    "assignee": "Priya",
+    "status": "completed",
+    "priority": "medium",
+    "dueDate": "Sep 15",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-10",
+    "name": "Set up registration QR check-in portal",
+    "assignee": "Amit",
+    "status": "completed",
+    "priority": "high",
+    "dueDate": "Sep 16",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-11",
+    "name": "Procure stage badges and lanyards",
+    "assignee": "Helli",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Sep 16",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-12",
+    "name": "Order faculty and guest mementos",
+    "assignee": "Vrunda",
+    "status": "completed",
+    "priority": "medium",
+    "dueDate": "Sep 17",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-13",
+    "name": "Test auditorium projector resolution",
+    "assignee": "Kavya",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Sep 17",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-14",
+    "name": "Send sponsor acknowledgment letters",
+    "assignee": "Kunal",
+    "status": "completed",
+    "priority": "medium",
+    "dueDate": "Sep 18",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-15",
+    "name": "Create volunteer WhatsApp communications group",
+    "assignee": "Vrunda",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Sep 18",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-16",
+    "name": "Arrange 20 drinking water jars for back-stage",
+    "assignee": "Suresh",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Sep 18",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-17",
+    "name": "Set up medical first-aid booth kit",
+    "assignee": "Pooja",
+    "status": "completed",
+    "priority": "high",
+    "dueDate": "Sep 19",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-18",
+    "name": "Brief campus security guards on gate passes",
+    "assignee": "Rahul",
+    "status": "completed",
+    "priority": "high",
+    "dueDate": "Sep 19",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-19",
+    "name": "Upload official promo reel to Instagram",
+    "assignee": "Priya",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Sep 19",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-20",
+    "name": "Inspect Stage 1 podium audio cables",
+    "assignee": "Rahul",
+    "status": "completed",
+    "priority": "medium",
+    "dueDate": "Sep 19",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-21",
+    "name": "Reserve parking slots for VIP guest vehicles",
+    "assignee": "Suresh",
+    "status": "completed",
+    "priority": "low",
+    "dueDate": "Sep 19",
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-22",
+    "name": "Generate final attendee name badges",
+    "assignee": "Helli",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "Sep 22",
+    "eventId": "felicific-2026"
+  }
+]

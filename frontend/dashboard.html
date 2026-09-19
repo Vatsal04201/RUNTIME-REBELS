@@ -69,7 +69,7 @@
           <span class="nav-count alert" id="navRiskCount">3</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="#" class="nav-item" id="navEventDay">
           <i class="fa-solid fa-clapperboard"></i>
           <span>Event Day Mode</span>
         </a>
@@ -443,6 +443,174 @@
 
     </main>
 
+  </div>
+
+  <!-- ==================== MODALS & OVERLAYS ==================== -->
+
+  <!-- 1. Meeting Transcript to Tasks Modal -->
+  <div class="dash-modal-overlay" id="modalMeeting">
+    <div class="dash-modal-card">
+      <div class="dash-modal-head">
+        <div class="dash-modal-title">
+          <i class="fa-solid fa-microphone-lines modal-head-icon"></i>
+          <div>
+            <h3>Meeting Transcript → Auto Tasks</h3>
+            <p>Paste your club meeting transcript or WhatsApp audio notes</p>
+          </div>
+        </div>
+        <button class="dash-modal-close" id="closeModalMeeting"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="dash-modal-body">
+        <div class="sample-pills">
+          <span class="sample-label">Load Sample Transcript:</span>
+          <button class="sample-chip" id="chipSampleMeeting">Stage & Sound Meeting (18 Sep)</button>
+        </div>
+
+        <textarea id="meetingTranscriptInput" class="meeting-textarea" rows="5" placeholder="Example:
+Rahul will check Stage 2 sound system today.
+Vrunda to confirm photographer booking on Friday.
+Helli needs to print 50 certificates tomorrow."></textarea>
+
+        <div id="aiExtractionResults" class="ai-extracted-results" style="display: none;"></div>
+
+        <div class="dash-modal-actions">
+          <button class="btn-ghost" id="btnCancelMeeting">Cancel</button>
+          <button class="btn-primary" id="btnExtractMeeting">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Extract Tasks with AI
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. One-Click AI Official Documents Modal -->
+  <div class="dash-modal-overlay" id="modalAiDocs">
+    <div class="dash-modal-card wide">
+      <div class="dash-modal-head">
+        <div class="dash-modal-title">
+          <i class="fa-solid fa-bolt modal-head-icon"></i>
+          <div>
+            <h3>One-Click AI Official Documents</h3>
+            <p>Auto-generated Dean letters, WhatsApp broadcasts, and vendor purchase orders</p>
+          </div>
+        </div>
+        <button class="dash-modal-close" id="closeModalAiDocs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="dash-modal-body">
+        <div class="doc-tabs">
+          <button class="doc-tab active" data-doctype="dean_permission">
+            <i class="fa-solid fa-file-shield"></i> Dean Permission Letter
+          </button>
+          <button class="doc-tab" data-doctype="whatsapp_broadcast">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp Team Blast
+          </button>
+          <button class="doc-tab" data-doctype="vendor_po">
+            <i class="fa-solid fa-file-invoice"></i> Vendor Work Order (Sound)
+          </button>
+        </div>
+
+        <div class="doc-preview-wrapper">
+          <div class="doc-preview-header">
+            <span class="doc-preview-title" id="docPreviewTitle">Dean Permission Letter</span>
+            <button class="btn-ghost btn-sm" id="btnCopyDoc"><i class="fa-regular fa-copy"></i> Copy Text</button>
+          </div>
+          <pre class="doc-preview-content" id="docPreviewContent">Loading document...</pre>
+        </div>
+
+        <div class="dash-modal-actions">
+          <button class="btn-ghost" id="btnCloseAiDocs">Close</button>
+          <button class="btn-primary" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> Print / Save PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Event Day Command Mode Overlay -->
+  <div class="dash-modal-overlay" id="modalEventDay">
+    <div class="dash-modal-card event-day-card">
+      <div class="dash-modal-head">
+        <div class="dash-modal-title">
+          <i class="fa-solid fa-clapperboard modal-head-icon"></i>
+          <div>
+            <h3>Event Day Command Room — Felicific 2026</h3>
+            <p>Live Stage Run-Sheet, Volunteer Dispatch, and Emergency Protocol</p>
+          </div>
+        </div>
+        <button class="dash-modal-close" id="closeModalEventDay"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="dash-modal-body">
+        <div class="event-day-grid">
+          <!-- Stage Schedule -->
+          <div class="event-day-col">
+            <h4 class="col-title"><i class="fa-solid fa-clock"></i> Live Stage Timeline</h4>
+            <div class="day-timeline">
+              <div class="day-time-slot done">
+                <span class="slot-hour">09:00 AM</span>
+                <div class="slot-card">
+                  <strong>Registration & QR Check-in</strong>
+                  <span>Main Gate • Lead: Vrunda • Completed</span>
+                </div>
+              </div>
+              <div class="day-time-slot current">
+                <span class="slot-hour">10:30 AM</span>
+                <div class="slot-card active">
+                  <strong>Inauguration Ceremony & Keynote</strong>
+                  <span>Auditorium • Lead: Helli • LIVE NOW</span>
+                </div>
+              </div>
+              <div class="day-time-slot pending">
+                <span class="slot-hour">01:00 PM</span>
+                <div class="slot-card">
+                  <strong>Battle of the Bands (Stage 2)</strong>
+                  <span>Sound verification in 45m • Lead: Rahul</span>
+                </div>
+              </div>
+              <div class="day-time-slot pending">
+                <span class="slot-hour">04:30 PM</span>
+                <div class="slot-card">
+                  <strong>EDM Fest & Award Distribution</strong>
+                  <span>Open Stage • Crowd passes verification</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Dispatch Actions -->
+          <div class="event-day-col">
+            <h4 class="col-title"><i class="fa-solid fa-tower-broadcast"></i> Quick Lead Dispatch</h4>
+            <div class="dispatch-buttons">
+              <button class="dispatch-btn" id="btnDispatchGate">
+                <i class="fa-solid fa-users"></i>
+                <div>
+                  <strong>Reinforce Gate Registration</strong>
+                  <span>Send 2 buffer volunteers to Entrance</span>
+                </div>
+              </button>
+              <button class="dispatch-btn" id="btnDispatchTech">
+                <i class="fa-solid fa-volume-high"></i>
+                <div>
+                  <strong>Audio Test Confirmation</strong>
+                  <span>Prompt Rahul to test backup microphone</span>
+                </div>
+              </button>
+              <button class="dispatch-btn emergency" id="btnDispatchPower">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div>
+                  <strong>Power Cut Contingency</strong>
+                  <span>Notify Electrician & Campus Generator Unit</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="dashboard.js"></script>

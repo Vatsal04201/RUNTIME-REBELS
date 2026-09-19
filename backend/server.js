@@ -30,6 +30,7 @@ const risksRouter = require('./routes/risks');
 const readinessRouter = require('./routes/readiness');
 const summaryRouter = require('./routes/summary');
 const activityRouter = require('./routes/activity');
+const aiRouter = require('./routes/ai');
 
 // API Mount points
 app.use('/api/events', eventsRouter);
@@ -41,6 +42,7 @@ app.use('/api/vendors', vendorsRouter);
 app.use('/api/risks', risksRouter);
 app.use('/api/dashboard/summary', summaryRouter);
 app.use('/api/activity', activityRouter);
+app.use('/api/ai', aiRouter);
 
 // Start Server
 app.listen(PORT, () => {

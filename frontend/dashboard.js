@@ -335,28 +335,317 @@ async function handleRiskAction(riskId, actionText) {
   }
 }
 
-// Quick action buttons
+// Quick action buttons and modal management
 function setupQuickActions() {
-  const actions = {
-    qaCreateEvent: 'Create Event modal',
-    qaGeneratePlan: 'AI Event Planner',
-    qaConvertMeeting: 'Meeting Transcript Parser',
-    qaAiActions: 'One-Click Official Letter / PDF Generator',
-    btnOpenOps: 'Event Operations Console',
-    btnTakeInsightAction: 'Sound Vendor Confirmation & Readiness Booster'
-  };
+  // 1. Meeting Transcript to Tasks Modal
+  const btnQaMeeting = document.getElementById('qaConvertMeeting');
+  if (btnQaMeeting) {
+    btnQaMeeting.addEventListener('click', () => {
+      openModal('modalMeeting');
+    });
+  }
 
-  for (const [id, label] of Object.entries(actions)) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('click', () => {
-        if (id === 'btnTakeInsightAction') {
-          handleRiskAction('risk-vendor-ven-1', 'Review');
+  const chipSample = document.getElementById('chipSampleMeeting');
+  if (chipSample) {
+    chipSample.addEventListener('click', () => {
+      const textarea = document.getElementById('meetingTranscriptInput');
+      if (textarea) {
+        textarea.value = `Core Committee Meeting (18 Sep):\n- Rahul will inspect Stage 2 sound system today.\n- Vrunda to confirm photographer booking on Friday.\n- Helli needs to print 50 certificates tomorrow.\n- Pooja to coordinate backup generator fuel check ASAP.`;
+      }
+    });
+  }
+
+  const btnExtract = document.getElementById('btnExtractMeeting');
+  if (btnExtract) {
+    btnExtract.addEventListener('click', async () => {
+      const textarea = document.getElementById('meetingTranscriptInput');
+      const text = textarea ? textarea.value.trim() : '';
+      if (!text) {
+        alert('Please enter or load a meeting transcript first.');
+        return;
+      }
+
+      const prevHtml = btnExtract.innerHTML;
+      btnExtract.disabled = true;
+      btnExtract.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Extracting Tasks...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ai/meeting-to-tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: text, eventId: 'felicific-2026' })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          const resultsDiv = document.getElementById('aiExtractionResults');
+          if (resultsDiv) {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+              <div class="ai-extracted-title">
+                <i class="fa-solid fa-circle-check"></i>
+                AI Extracted & Created ${data.count} New Actionable Tasks
+              </div>
+              <div style="margin-top: 0.5rem;">
+                ${data.tasks.map(t => `
+                  <span class="ai-task-tag">
+                    <i class="fa-solid fa-bolt"></i>
+                    <strong>${escapeHtml(t.assignee)}:</strong> ${escapeHtml(t.name)}
+                    <span style="opacity:0.7">(${escapeHtml(t.dueDate)})</span>
+                  </span>
+                `).join('')}
+              </div>
+            `;
+          }
+
+          // Refresh dashboard metrics and task list
+          await loadDashboardData();
         } else {
-          alert(`${label} will open here.`);
+          alert(data.message || 'Could not extract tasks.');
         }
+      } catch (err) {
+        console.error('Error extracting tasks:', err);
+        alert('Failed to connect to backend AI endpoint.');
+      } finally {
+        btnExtract.disabled = false;
+        btnExtract.innerHTML = prevHtml;
+      }
+    });
+  }
+
+  // 2. One-Click AI Official Documents Modal
+  const btnQaDocs = document.getElementById('qaAiActions');
+  if (btnQaDocs) {
+    btnQaDocs.addEventListener('click', () => {
+      openModal('modalAiDocs');
+      loadAiDocument('dean_permission');
+    });
+  }
+
+  const docTabs = document.querySelectorAll('.doc-tab');
+  docTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      docTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const docType = tab.getAttribute('data-doctype');
+      loadAiDocument(docType);
+    });
+  });
+
+  const btnCopyDoc = document.getElementById('btnCopyDoc');
+  if (btnCopyDoc) {
+    btnCopyDoc.addEventListener('click', async () => {
+      const preview = document.getElementById('docPreviewContent');
+      if (preview && preview.textContent) {
+        try {
+          await navigator.clipboard.writeText(preview.textContent);
+          const oldText = btnCopyDoc.innerHTML;
+          btnCopyDoc.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+          setTimeout(() => {
+            btnCopyDoc.innerHTML = oldText;
+          }, 2000);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    });
+  }
+
+  // 3. AI Master Plan Generator
+  const btnQaPlan = document.getElementById('qaGeneratePlan');
+  if (btnQaPlan) {
+    btnQaPlan.addEventListener('click', async () => {
+      openModal('modalAiDocs');
+      const previewTitle = document.getElementById('docPreviewTitle');
+      const previewContent = document.getElementById('docPreviewContent');
+      if (previewTitle) previewTitle.textContent = 'AI Master Execution Plan — Felicific 2026';
+      if (previewContent) previewContent.textContent = 'Generating 5-Phase Master Execution Plan with ClubOps AI...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ai/generate-plan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventName: 'Felicific 2026' })
+        });
+        const data = await res.json();
+        if (data.success && data.plan) {
+          let planText = `========================================================\n` +
+            `🎯 ${data.plan.title.toUpperCase()}\n` +
+            `Category: ${data.plan.type} | Generated by ClubOps AI Engine\n` +
+            `========================================================\n\n`;
+
+          data.plan.phases.forEach((p, idx) => {
+            planText += `[PHASE ${idx + 1}: ${p.phase.toUpperCase()}]  •  Status: ${p.status.toUpperCase()}\n`;
+            p.tasks.forEach(t => {
+              planText += `  ✔ ${t}\n`;
+            });
+            planText += `\n`;
+          });
+          previewContent.textContent = planText;
+          loadDashboardData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  // 4. Quick Create Event
+  const btnQaCreate = document.getElementById('qaCreateEvent');
+  if (btnQaCreate) {
+    btnQaCreate.addEventListener('click', async () => {
+      const eventName = prompt('Enter new event name to initialize in ClubOps AI:', 'CodeSprint Hackathon 2026');
+      if (eventName) {
+        try {
+          const res = await fetch(`${API_BASE}/api/events`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: eventName,
+              tagline: 'Annual 24-Hour Inter-College Hackathon',
+              date: '15 October 2026',
+              time: '10:00 AM',
+              location: 'Main IT Lab 3',
+              totalGuests: 120,
+              totalVolunteers: 15
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(`Event "${eventName}" successfully created and registered!`);
+            loadDashboardData();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    });
+  }
+
+  // 5. Event Day Command Room
+  const navEventDay = document.getElementById('navEventDay');
+  const btnOpenOps = document.getElementById('btnOpenOps');
+
+  if (navEventDay) {
+    navEventDay.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('modalEventDay');
+    });
+  }
+
+  if (btnOpenOps) {
+    btnOpenOps.addEventListener('click', () => {
+      openModal('modalEventDay');
+    });
+  }
+
+  // Event Day Dispatch Buttons
+  const btnDispatchGate = document.getElementById('btnDispatchGate');
+  if (btnDispatchGate) {
+    btnDispatchGate.addEventListener('click', () => {
+      alert('DISPATCH CONFIRMED:\n\n2 Buffer volunteers (Rohan Shah & Priya Patel) have been notified via WhatsApp to reinforce the Main Registration Gate.');
+    });
+  }
+
+  const btnDispatchTech = document.getElementById('btnDispatchTech');
+  if (btnDispatchTech) {
+    btnDispatchTech.addEventListener('click', () => {
+      alert('DISPATCH CONFIRMED:\n\nAudio alert dispatched to Rahul: Perform Stage 2 secondary microphone line check before 1:00 PM.');
+    });
+  }
+
+  const btnDispatchPower = document.getElementById('btnDispatchPower');
+  if (btnDispatchPower) {
+    btnDispatchPower.addEventListener('click', () => {
+      alert('🚨 EMERGENCY PROTOCOL TRIGGERED:\n\nCampus Electrical Substation and Backup Generator Unit on standby for Stage 1.');
+    });
+  }
+
+  // 6. AI Insight Action (Sound Vendor confirmation)
+  const btnInsight = document.getElementById('btnTakeInsightAction');
+  if (btnInsight) {
+    btnInsight.addEventListener('click', () => {
+      handleRiskAction('risk-vendor-ven-1', 'Review');
+    });
+  }
+
+  // Modal Close buttons
+  setupModalCloser('closeModalMeeting', 'modalMeeting');
+  setupModalCloser('btnCancelMeeting', 'modalMeeting');
+  setupModalCloser('closeModalAiDocs', 'modalAiDocs');
+  setupModalCloser('btnCloseAiDocs', 'modalAiDocs');
+  setupModalCloser('closeModalEventDay', 'modalEventDay');
+
+  // Close modals on clicking overlay backdrop
+  document.querySelectorAll('.dash-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // Close modals on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.dash-modal-overlay.active').forEach(m => {
+        m.classList.remove('active');
       });
+      document.body.style.overflow = '';
     }
+  });
+}
+
+// Modal Helper Functions
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+function setupModalCloser(buttonId, modalId) {
+  const btn = document.getElementById(buttonId);
+  if (btn) {
+    btn.addEventListener('click', () => closeModal(modalId));
+  }
+}
+
+// Load AI Official Document
+async function loadAiDocument(type) {
+  const preview = document.getElementById('docPreviewContent');
+  const title = document.getElementById('docPreviewTitle');
+  if (!preview) return;
+
+  preview.textContent = 'Generating official document with ClubOps AI...';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/ai/generate-letter`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, eventId: 'felicific-2026' })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      if (title) title.textContent = data.title;
+      preview.textContent = data.content;
+    } else {
+      preview.textContent = 'Error: ' + (data.message || 'Unable to generate document.');
+    }
+  } catch (err) {
+    console.error('Error fetching AI document:', err);
+    preview.textContent = 'Unable to connect to backend server. Please verify port 5000 is running.';
   }
 }
 
@@ -389,3 +678,4 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+

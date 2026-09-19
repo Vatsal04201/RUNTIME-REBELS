@@ -201,5 +201,49 @@
     "priority": "medium",
     "dueDate": "Sep 22",
     "eventId": "felicific-2026"
+  },
+  {
+    "id": "task-ai-1789811129084-0",
+    "name": "Inspect Stage 2 sound mixer today",
+    "assignee": "Rahul",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "Today",
+    "isToday": true,
+    "eventId": "felicific-2026",
+    "extractedByAi": true
+  },
+  {
+    "id": "task-ai-1789811129084-1",
+    "name": "Finalize photographer contract on Friday",
+    "assignee": "Vrunda",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "Friday",
+    "isToday": false,
+    "eventId": "felicific-2026",
+    "extractedByAi": true
+  },
+  {
+    "id": "task-ai-1789811383446-0",
+    "name": "Inspect Stage 2 sound system today",
+    "assignee": "Rahul",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "Today",
+    "isToday": true,
+    "eventId": "felicific-2026",
+    "extractedByAi": true
+  },
+  {
+    "id": "task-ai-1789811383446-1",
+    "name": "Confirm photographer booking on Friday",
+    "assignee": "Vrunda",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "Friday",
+    "isToday": false,
+    "eventId": "felicific-2026",
+    "extractedByAi": true
   }
 ]

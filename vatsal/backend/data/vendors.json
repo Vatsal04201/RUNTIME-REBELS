@@ -1,0 +1,46 @@
+[
+  {
+    "id": "ven-1",
+    "name": "SoundCraft Audio Solutions",
+    "category": "Sound",
+    "status": "unconfirmed",
+    "contactPerson": "Rajesh Verma",
+    "phone": "+91 98765 43210",
+    "estimatedCost": "₹18,500",
+    "isCritical": true,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "ven-2",
+    "name": "Prism Stage & Lighting",
+    "category": "Stage",
+    "status": "confirmed",
+    "contactPerson": "Manish Varma",
+    "phone": "+91 98444 33221",
+    "estimatedCost": "₹24,000",
+    "isCritical": true,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "ven-3",
+    "name": "Royal Caterers & Dining",
+    "category": "Catering",
+    "status": "confirmed",
+    "contactPerson": "Sunita Parmar",
+    "phone": "+91 98222 11223",
+    "estimatedCost": "₹32,000",
+    "isCritical": false,
+    "eventId": "felicific-2026"
+  },
+  {
+    "id": "ven-4",
+    "name": "PrintCraft Media Solutions",
+    "category": "Printing",
+    "status": "confirmed",
+    "contactPerson": "Haresh Shah",
+    "phone": "+91 98111 55443",
+    "estimatedCost": "₹8,500",
+    "isCritical": false,
+    "eventId": "felicific-2026"
+  }
+]

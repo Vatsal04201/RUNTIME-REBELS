@@ -29,52 +29,52 @@
       <nav class="side-nav">
         <div class="nav-group-label">Workspace</div>
 
-        <a href="#" class="nav-item active">
+        <a href="dashboard.html" class="nav-item active">
           <i class="fa-solid fa-chart-line"></i>
           <span>Dashboard</span>
           <span class="nav-glow"></span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="create-event.html" class="nav-item">
           <i class="fa-solid fa-calendar-days"></i>
           <span>Events</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="meeting-tasks.html" class="nav-item">
           <i class="fa-solid fa-list-check"></i>
           <span>Tasks</span>
           <span class="nav-count" id="navTaskCount">5</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="volunteers.html" class="nav-item">
           <i class="fa-solid fa-users"></i>
           <span>Volunteers</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="guests.html" class="nav-item">
           <i class="fa-solid fa-ticket"></i>
           <span>Guests</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="vendors.html" class="nav-item">
           <i class="fa-solid fa-building"></i>
           <span>Vendors</span>
         </a>
 
         <div class="nav-group-label">Intelligence</div>
 
-        <a href="#" class="nav-item">
+        <a href="risk-radar.html" class="nav-item">
           <i class="fa-solid fa-satellite-dish"></i>
           <span>Risk Radar</span>
           <span class="nav-count alert" id="navRiskCount">3</span>
         </a>
 
-        <a href="#" class="nav-item" id="navEventDay">
+        <a href="event-day.html" class="nav-item" id="navEventDay">
           <i class="fa-solid fa-clapperboard"></i>
           <span>Event Day Mode</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="club-memory.html" class="nav-item">
           <i class="fa-solid fa-brain"></i>
           <span>Club Memory</span>
         </a>
@@ -122,6 +122,10 @@
             <input type="text" placeholder="Search events, tasks, vendors…">
             <span class="kbd">⌘K</span>
           </div>
+
+          <a href="create-event.html" class="btn-primary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-weight:600; padding:8px 16px; border-radius:10px;">
+            <i class="fa-solid fa-plus"></i> Create Event
+          </a>
 
           <div class="status-ticker">
             <span class="pulse-dot"></span>
@@ -282,10 +286,17 @@
 
             </div>
 
-            <button class="btn-primary" id="btnOpenOps">
-              Open Event Operations
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;">
+              <a href="event-planner.html" class="btn-primary" id="btnOpenOps" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                Open Event Operations
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+
+              <a href="create-event.html" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-calendar-plus"></i>
+                Create New Event
+              </a>
+            </div>
 
           </section>
 
@@ -298,7 +309,7 @@
                 <p class="panel-sub" id="tasksAttentionText">3 tasks need your attention</p>
               </div>
 
-              <a href="#" class="panel-link" id="btnViewAllTasks">
+              <a href="meeting-tasks.html" class="panel-link" id="btnViewAllTasks">
                 View all
                 <i class="fa-solid fa-arrow-right"></i>
               </a>

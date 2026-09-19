@@ -317,7 +317,9 @@ async function testDashboardDomIntegrity() {
     'taskListContainer',
     'activityListContainer',
     'deadlineListContainer',
-    'aiInsightText'
+    'aiInsightText',
+    'dashboardSearchInput',
+    'searchResultsDropdown'
   ];
 
   for (const id of requiredIds) {

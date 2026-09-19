@@ -117,10 +117,11 @@
 
         <div class="topbar-right">
 
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search events, tasks, vendors…">
-            <span class="kbd">⌘K</span>
+          <div class="search-box" id="dashboardSearchWrapper" style="position: relative;">
+            <i class="fa-solid fa-magnifying-glass" style="color: var(--accent-cyan);"></i>
+            <input type="text" id="dashboardSearchInput" placeholder="Search events, tasks, vendors, tools…" autocomplete="off">
+            <span class="kbd" id="kbdShortcut" title="Press Ctrl+K or Cmd+K to search">⌘K</span>
+            <div id="searchResultsDropdown" class="search-results-dropdown" style="display: none;"></div>
           </div>
 
           <a href="create-event.html" class="btn-primary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-weight:600; padding:8px 16px; border-radius:10px;">

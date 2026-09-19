@@ -6,11 +6,20 @@
 // Auto-detect API base (works whether served from backend on :5000 or frontend on :3000)
 const API_BASE = window.location.port === '5000' ? '' : 'http://localhost:5000';
 
+let searchIndex = {
+  events: [],
+  tasks: [],
+  vendors: []
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   loadDashboardData();
 
   // Quick action alerts
   setupQuickActions();
+
+  // Setup Live Global Search
+  setupDashboardSearch();
 
   // Poll for updates every 10 seconds
   setInterval(loadDashboardData, 10000);
@@ -19,11 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Main data loader
 async function loadDashboardData() {
   try {
-    const [summaryRes, tasksRes, activityRes, eventsRes] = await Promise.all([
+    const [summaryRes, tasksRes, activityRes, eventsRes, vendorsRes] = await Promise.all([
       fetch(`${API_BASE}/api/dashboard/summary`),
       fetch(`${API_BASE}/api/tasks`),
       fetch(`${API_BASE}/api/activity`),
-      fetch(`${API_BASE}/api/events`)
+      fetch(`${API_BASE}/api/events`),
+      fetch(`${API_BASE}/api/vendors`).catch(() => ({ ok: false }))
     ]);
 
     if (!summaryRes.ok || !tasksRes.ok || !activityRes.ok) {
@@ -34,6 +44,12 @@ async function loadDashboardData() {
     const tasksData = await tasksRes.json();
     const activityData = await activityRes.json();
     const eventsData = eventsRes.ok ? await eventsRes.json() : { success: false };
+    const vendorsData = vendorsRes.ok ? await vendorsRes.json() : { success: false };
+
+    // Update Global Search Index
+    if (eventsData.success && Array.isArray(eventsData.data)) searchIndex.events = eventsData.data;
+    if (tasksData.success && Array.isArray(tasksData.data)) searchIndex.tasks = tasksData.data;
+    if (vendorsData.success && Array.isArray(vendorsData.data)) searchIndex.vendors = vendorsData.data;
 
     hideConnectionBanner();
 
@@ -765,4 +781,301 @@ function renderAllEvents(events) {
     `;
   }).join('');
 }
+
+// ==========================================
+// 6. GLOBAL LIVE SPOTLIGHT SEARCH
+// ==========================================
+function setupDashboardSearch() {
+  const searchInput = document.getElementById('dashboardSearchInput');
+  const searchDropdown = document.getElementById('searchResultsDropdown');
+  const searchWrapper = document.getElementById('dashboardSearchWrapper');
+  const kbd = document.getElementById('kbdShortcut');
+
+  if (!searchInput || !searchDropdown) return;
+
+  const SYSTEM_TOOLS = [
+    { title: 'Event Planner & 3-Phase Board', sub: 'Manage Before/During/After phases & team leads', url: 'event-planner.html', icon: 'fa-list-check', badge: 'Tool', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' },
+    { title: 'Emergency SOS Crisis Solver', sub: '1-Click resolution protocols for live event emergencies', url: 'event-sos.html', icon: 'fa-triangle-exclamation', badge: 'Crisis', bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--accent-red)' },
+    { title: 'One-Click AI Actions & Letters', sub: 'Generate Dean letters, WhatsApp blasts, Vendor POs', url: 'ai-actions.html', icon: 'fa-bolt', badge: 'AI Action', bg: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-purple)' },
+    { title: 'Event Readiness Score Audit', sub: 'Detailed mathematical breakdown of event health', url: 'readiness.html', icon: 'fa-gauge-high', badge: 'Audit', bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)' },
+    { title: 'Live Threat Risk Radar', sub: 'Identify and resolve potential bottlenecks', url: 'risk-radar.html', icon: 'fa-shield-halved', badge: 'Radar', bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)' },
+    { title: 'Master Event Timeline', sub: 'Minute-by-minute schedule and stage run-sheet', url: 'timeline.html', icon: 'fa-clock', badge: 'Timeline', bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--accent-blue)' },
+    { title: 'Event Day Live Command Room', sub: 'Real-time telemetry, crowd arrivals, vendor check-ins', url: 'event-day.html', icon: 'fa-satellite-dish', badge: 'Command', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' },
+    { title: 'What-If Contingency Simulator', sub: 'Simulate rain, delayed leads, and absent volunteers', url: 'what-if.html', icon: 'fa-wand-magic-sparkles', badge: 'Sim', bg: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-purple)' },
+    { title: 'Club Memory Institutional Archives', sub: 'Search past event budgets, bills & agreements', url: 'club-memory.html', icon: 'fa-brain', badge: 'Memory', bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--accent-blue)' },
+    { title: 'Volunteer Roster & Duty Chart', sub: 'Assign and track 20 student volunteer leads', url: 'volunteers.html', icon: 'fa-users', badge: 'Team', bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)' },
+    { title: 'QR Fast-Track Check-In Terminal', sub: 'Scan digital attendee passes at venue entrance', url: 'volunteer-checkin.html', icon: 'fa-qrcode', badge: 'Check-In', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' },
+    { title: 'VIP Guest Tracker & RSVPs', sub: 'Manage delegates, keynote speakers, and badge access', url: 'guests.html', icon: 'fa-user-tie', badge: 'Guests', bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)' },
+    { title: 'Vendor Procurement Directory', sub: 'Sound, lighting, catering contracts and balances', url: 'vendors.html', icon: 'fa-truck-field', badge: 'Vendor', bg: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-purple)' },
+    { title: 'Post-Event Retrospective Report', sub: 'Synthesize PDF summary, expenditure & learnings', url: 'post-event.html', icon: 'fa-file-invoice', badge: 'Report', color: 'rgba(59, 130, 246, 0.15)', color: 'var(--accent-blue)' },
+    { title: 'Digital Pass & Invitation Card', sub: 'Generate shareable digital invitations with QR passes', url: 'invitation.html', icon: 'fa-id-card', badge: 'Pass', bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)' },
+    { title: 'Broadcast Message Studio', sub: 'Create tailored WhatsApp/Email messages with AI', url: 'message-generator.html', icon: 'fa-paper-plane', badge: 'Messages', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' },
+    { title: 'Meeting Transcript to Auto Tasks', sub: 'Extract action items from audio or chat discussion', url: 'meeting-tasks.html', icon: 'fa-microphone-lines', badge: 'AI Action', bg: 'rgba(168, 85, 247, 0.15)', color: 'var(--accent-purple)' },
+    { title: 'Did I Forget Anything? Gap Check', sub: 'Proactive sanity check on all logistics', url: 'forgot-check.html', icon: 'fa-circle-question', badge: 'AI Action', bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)' },
+    { title: 'Register New College Fest', sub: 'Create event with leads for photo, sound, stage', url: 'create-event.html', icon: 'fa-plus', badge: 'Create', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' }
+  ];
+
+  let selectedIndex = -1;
+
+  function renderSearchResults(query) {
+    const q = (query || '').trim().toLowerCase();
+    selectedIndex = -1;
+
+    if (!q) {
+      // Show default top tools and suggestions
+      const defaultTools = SYSTEM_TOOLS.slice(0, 5);
+      searchDropdown.innerHTML = `
+        <div class="search-group-header"><i class="fa-solid fa-sparkles"></i> Quick Jump Tools</div>
+        ${defaultTools.map((t, idx) => `
+          <div class="search-result-item" data-url="${t.url}" data-idx="${idx}">
+            <div class="search-item-left">
+              <div class="search-item-icon" style="background:${t.bg}; color:${t.color};">
+                <i class="fa-solid ${t.icon}"></i>
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">${escapeHtml(t.title)}</div>
+                <div class="search-item-sub">${escapeHtml(t.sub)}</div>
+              </div>
+            </div>
+            <span class="search-item-badge" style="background:${t.bg}; color:${t.color};">${t.badge}</span>
+          </div>
+        `).join('')}
+        <div style="border-top:1px solid rgba(255,255,255,0.06); padding:8px 16px; font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+          <span>Type to search events, tasks, vendors...</span>
+          <span><kbd style="background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px;">ESC</kbd> to close</span>
+        </div>
+      `;
+      searchDropdown.style.display = 'block';
+      bindItemClicks();
+      return;
+    }
+
+    // Filter tools
+    const matchedTools = SYSTEM_TOOLS.filter(t => 
+      t.title.toLowerCase().includes(q) || t.sub.toLowerCase().includes(q)
+    );
+
+    // Filter events
+    const matchedEvents = (searchIndex.events || []).filter(e => 
+      (e.name && e.name.toLowerCase().includes(q)) ||
+      (e.type && e.type.toLowerCase().includes(q)) ||
+      (e.venue && e.venue.toLowerCase().includes(q)) ||
+      (e.description && e.description.toLowerCase().includes(q))
+    );
+
+    // Filter tasks
+    const matchedTasks = (searchIndex.tasks || []).filter(t => 
+      (t.title && t.title.toLowerCase().includes(q)) ||
+      (t.owner && t.owner.toLowerCase().includes(q)) ||
+      (t.priority && t.priority.toLowerCase().includes(q))
+    );
+
+    // Filter vendors
+    const matchedVendors = (searchIndex.vendors || []).filter(v => 
+      (v.name && v.name.toLowerCase().includes(q)) ||
+      (v.category && v.category.toLowerCase().includes(q)) ||
+      (v.contact && v.contact.toLowerCase().includes(q))
+    );
+
+    let html = '';
+    let itemIndex = 0;
+
+    // Events group
+    if (matchedEvents.length > 0) {
+      html += `<div class="search-group-header"><i class="fa-solid fa-calendar-days"></i> Events (${matchedEvents.length})</div>`;
+      matchedEvents.slice(0, 3).forEach(ev => {
+        html += `
+          <div class="search-result-item" data-action="scroll-event" data-event-id="${escapeHtml(ev.id)}" data-url="dashboard.html#upcomingEventsSection" data-idx="${itemIndex++}">
+            <div class="search-item-left">
+              <div class="search-item-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan);">
+                <i class="fa-solid fa-calendar-star"></i>
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">${escapeHtml(ev.name)}</div>
+                <div class="search-item-sub">${escapeHtml(ev.date || 'Upcoming')} • ${escapeHtml(ev.venue || 'Campus Venue')}</div>
+              </div>
+            </div>
+            <span class="search-item-badge" style="background:rgba(16, 185, 129, 0.15); color:var(--accent-green);">${escapeHtml(ev.status || 'Upcoming')}</span>
+          </div>
+        `;
+      });
+    }
+
+    // Tasks group
+    if (matchedTasks.length > 0) {
+      html += `<div class="search-group-header"><i class="fa-solid fa-list-check"></i> Tasks (${matchedTasks.length})</div>`;
+      matchedTasks.slice(0, 4).forEach(t => {
+        const isDone = t.status && t.status.toLowerCase() === 'completed';
+        html += `
+          <div class="search-result-item" data-url="event-planner.html" data-idx="${itemIndex++}">
+            <div class="search-item-left">
+              <div class="search-item-icon" style="background:${isDone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)'}; color:${isDone ? 'var(--accent-green)' : 'var(--accent-blue)'};">
+                <i class="fa-solid ${isDone ? 'fa-check' : 'fa-circle-dot'}"></i>
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">${escapeHtml(t.title)}</div>
+                <div class="search-item-sub">Assigned: ${escapeHtml(t.owner || 'Club Team')} • Due: ${escapeHtml(t.deadline || 'Event Day')}</div>
+              </div>
+            </div>
+            <span class="search-item-badge" style="background:rgba(255, 255, 255, 0.08); color:var(--text-secondary);">${escapeHtml(t.priority || 'Task')}</span>
+          </div>
+        `;
+      });
+    }
+
+    // Vendors group
+    if (matchedVendors.length > 0) {
+      html += `<div class="search-group-header"><i class="fa-solid fa-truck-field"></i> Vendors (${matchedVendors.length})</div>`;
+      matchedVendors.slice(0, 3).forEach(v => {
+        html += `
+          <div class="search-result-item" data-url="vendors.html" data-idx="${itemIndex++}">
+            <div class="search-item-left">
+              <div class="search-item-icon" style="background:rgba(168, 85, 247, 0.15); color:var(--accent-purple);">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">${escapeHtml(v.name)}</div>
+                <div class="search-item-sub">${escapeHtml(v.category || 'Vendor')} • ${v.cost ? '₹' + Number(v.cost).toLocaleString('en-IN') : 'Quote Pending'}</div>
+              </div>
+            </div>
+            <span class="search-item-badge" style="background:rgba(168, 85, 247, 0.15); color:var(--accent-purple);">${escapeHtml(v.status || 'Active')}</span>
+          </div>
+        `;
+      });
+    }
+
+    // System Tools group
+    if (matchedTools.length > 0) {
+      html += `<div class="search-group-header"><i class="fa-solid fa-compass"></i> Features & Tools (${matchedTools.length})</div>`;
+      matchedTools.slice(0, 3).forEach(t => {
+        html += `
+          <div class="search-result-item" data-url="${t.url}" data-idx="${itemIndex++}">
+            <div class="search-item-left">
+              <div class="search-item-icon" style="background:${t.bg}; color:${t.color};">
+                <i class="fa-solid ${t.icon}"></i>
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">${escapeHtml(t.title)}</div>
+                <div class="search-item-sub">${escapeHtml(t.sub)}</div>
+              </div>
+            </div>
+            <span class="search-item-badge" style="background:${t.bg}; color:${t.color};">${t.badge}</span>
+          </div>
+        `;
+      });
+    }
+
+    // Deep search in Club Memory RAG Archives
+    html += `
+      <div style="border-top:1px solid rgba(255,255,255,0.08); margin-top:6px;">
+        <div class="search-result-item" data-url="club-memory.html?q=${encodeURIComponent(query)}" data-idx="${itemIndex++}">
+          <div class="search-item-left">
+            <div class="search-item-icon" style="background:rgba(59, 130, 246, 0.18); color:var(--accent-blue);">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-title">Search Club Memory for "${escapeHtml(query)}"</div>
+              <div class="search-item-sub">Vector search across past budgets, contracts & Dean letters</div>
+            </div>
+          </div>
+          <span style="font-size:0.75rem; color:var(--accent-blue); font-weight:700;">Query RAG →</span>
+        </div>
+      </div>
+    `;
+
+    searchDropdown.innerHTML = html;
+    searchDropdown.style.display = 'block';
+    bindItemClicks();
+  }
+
+  function bindItemClicks() {
+    searchDropdown.querySelectorAll('.search-result-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const url = item.getAttribute('data-url');
+        const action = item.getAttribute('data-action');
+        if (action === 'scroll-event') {
+          searchDropdown.style.display = 'none';
+          searchInput.value = '';
+          const sec = document.getElementById('upcomingEventsSection');
+          if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        if (url) {
+          window.location.href = url;
+        }
+      });
+    });
+  }
+
+  // Input event
+  searchInput.addEventListener('input', (e) => {
+    renderSearchResults(e.target.value);
+  });
+
+  searchInput.addEventListener('focus', () => {
+    renderSearchResults(searchInput.value);
+  });
+
+  // Keyboard navigation
+  searchInput.addEventListener('keydown', (e) => {
+    const items = searchDropdown.querySelectorAll('.search-result-item');
+    if (!items.length || searchDropdown.style.display === 'none') return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex + 1) % items.length;
+      updateSelected(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+      updateSelected(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0 && items[selectedIndex]) {
+        items[selectedIndex].click();
+      } else if (items[0]) {
+        items[0].click();
+      }
+    } else if (e.key === 'Escape') {
+      searchDropdown.style.display = 'none';
+      searchInput.blur();
+    }
+  });
+
+  function updateSelected(items) {
+    items.forEach((item, idx) => {
+      if (idx === selectedIndex) {
+        item.classList.add('selected');
+        item.scrollIntoView({ block: 'nearest' });
+      } else {
+        item.classList.remove('selected');
+      }
+    });
+  }
+
+  // Global Ctrl+K / Cmd+K handler
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+      renderSearchResults(searchInput.value);
+    }
+  });
+
+  if (kbd) {
+    kbd.addEventListener('click', () => {
+      searchInput.focus();
+      renderSearchResults(searchInput.value);
+    });
+  }
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (searchWrapper && !searchWrapper.contains(e.target)) {
+      searchDropdown.style.display = 'none';
+    }
+  });
+}
+
 

@@ -79,7 +79,7 @@
           <i class="fa-solid fa-wand-magic-sparkles"></i> AI Semantic Memory Query
         </div>
         <div style="display:flex; gap:12px;">
-          <input type="text" class="input" id="memorySearchInput" placeholder="Ask Club Memory: e.g. Which sound vendor did we use last year and what was the cost?" style="flex:1; font-size:14.5px;">
+          <input type="text" class="input" id="memorySearchInput" placeholder="Ask Club Memory: e.g. Which sound vendor did we use last year and what was the cost?" style="flex:1; font-size:14.5px;" onkeydown="if(event.key==='Enter') queryMemory()">
           <button class="btn btn-primary" onclick="queryMemory()"><i class="fa-solid fa-magnifying-glass"></i> Search Memory</button>
         </div>
 
@@ -290,7 +290,15 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', loadMemories);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMemories();
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q) {
+        document.getElementById('memorySearchInput').value = q;
+        setTimeout(queryMemory, 350);
+      }
+    });
   </script>
 </body>
 </html>

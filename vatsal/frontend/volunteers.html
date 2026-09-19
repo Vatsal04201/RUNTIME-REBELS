@@ -217,7 +217,7 @@
               if (!name) return;
 
               await ClubOps.api.post('/api/volunteers', {
-                eventId: 'felicific-2026', name, team, role, contact, status: 'Assigned'
+                eventId: ClubOps.getActiveEventId() || 'felicific-2026', name, team, role, contact, status: 'Assigned'
               });
               ClubOps.toast(`Added ${name} to ${team} team!`, 'success');
               loadVolunteers();

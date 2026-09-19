@@ -28,9 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // Main data loader
 async function loadDashboardData() {
   try {
+    const activeEvId = localStorage.getItem('clubops_active_event_id') || '';
+    const summaryUrl = activeEvId ? `${API_BASE}/api/dashboard/summary?eventId=${activeEvId}` : `${API_BASE}/api/dashboard/summary`;
+    const tasksUrl = activeEvId ? `${API_BASE}/api/tasks?eventId=${activeEvId}` : `${API_BASE}/api/tasks`;
+
     const [summaryRes, tasksRes, activityRes, eventsRes, vendorsRes] = await Promise.all([
-      fetch(`${API_BASE}/api/dashboard/summary`),
-      fetch(`${API_BASE}/api/tasks`),
+      fetch(summaryUrl),
+      fetch(tasksUrl),
       fetch(`${API_BASE}/api/activity`),
       fetch(`${API_BASE}/api/events`),
       fetch(`${API_BASE}/api/vendors`).catch(() => ({ ok: false }))
@@ -746,7 +750,7 @@ function renderAllEvents(events) {
     }
 
     return `
-      <div class="glass-card" style="padding: 18px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; cursor: pointer;" onclick="window.location.href='event-planner.html'" onmouseover="this.style.borderColor='var(--accent-cyan)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)'; this.style.transform='none'">
+      <div class="glass-card" style="padding: 18px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; cursor: pointer;" onclick="localStorage.setItem('clubops_active_event_id', '${ev.id}'); window.location.href='event-planner.html?eventId=${ev.id}'" onmouseover="this.style.borderColor='var(--accent-cyan)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)'; this.style.transform='none'">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
             <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">

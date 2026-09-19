@@ -55,6 +55,16 @@
         </div>
       </header>
 
+      <!-- Active Event Selector -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); border:1px solid var(--border); padding:10px 16px; border-radius:12px; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fa-solid fa-calendar-check" style="color:var(--cyan); font-size:16px;"></i>
+          <label for="actionsEventSelect" style="font-size:13px; color:var(--text-1); font-weight:600;">Document For Event:</label>
+          <select id="actionsEventSelect" style="background:var(--bg-card-2); color:var(--text-0); border:1px solid var(--border-strong); padding:6px 12px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; min-width:240px;"></select>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadActionDoc(currentDocType)"><i class="fa-solid fa-sparkles" style="color:var(--cyan);"></i> Regenerate with Gemini AI</button>
+      </div>
+
       <div class="grid grid-3" style="grid-template-columns: 1.1fr 2fr; gap: 24px;">
         <!-- Left Action Selector -->
         <div style="display:flex; flex-direction:column; gap:12px;">
@@ -123,8 +133,17 @@
   <script src="shared.js"></script>
   <script>
     let currentDocType = 'dean_permission';
+    let currentEventId = '';
+
+    async function initActions() {
+      await ClubOps.loadEventSelector('actionsEventSelect', (eventId) => {
+        currentEventId = eventId;
+        loadActionDoc(currentDocType);
+      });
+    }
 
     async function loadActionDoc(type, tileEl) {
+      if (!type) type = currentDocType || 'dean_permission';
       currentDocType = type;
       if (tileEl) {
         document.querySelectorAll('.action-tile').forEach(t => t.classList.remove('active'));
@@ -132,10 +151,11 @@
       }
 
       const contentBox = document.getElementById('docContent');
-      contentBox.textContent = 'Generating official document with ClubOps AI engine...';
+      contentBox.textContent = 'Generating official document with Google Gemini AI engine...';
 
       try {
-        const res = await ClubOps.api.post('/api/ai/generate-letter', { type, eventId: 'felicific-2026' });
+        const evId = currentEventId || ClubOps.getActiveEventId();
+        const res = await ClubOps.api.post('/api/ai/generate-letter', { type, eventId: evId });
         if (res.success) {
           document.getElementById('docTitle').innerHTML = `<i class="fa-solid fa-file-lines"></i> ${res.title}`;
           contentBox.textContent = res.content;
@@ -155,7 +175,7 @@
       setTimeout(() => btn.innerHTML = prev, 2000);
     }
 
-    document.addEventListener('DOMContentLoaded', () => loadActionDoc('dean_permission'));
+    document.addEventListener('DOMContentLoaded', initActions);
   </script>
 </body>
 </html>

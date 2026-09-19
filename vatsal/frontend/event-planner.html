@@ -57,14 +57,27 @@
     <main class="main">
       <header class="topbar">
         <div class="page-title">
-          <h1><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--cyan);"></i> AI 3-Phase Event Planner <span class="badge-ai">Autonomous</span></h1>
-          <p>Structured operational breakdown for <strong id="plannerEventName">Felicific 2026</strong>. Add, edit, or check off tasks.</p>
+          <h1><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--cyan);"></i> AI 3-Phase Event Planner <span class="badge-ai">Gemini AI</span></h1>
+          <p>Operational execution plan for <strong id="plannerEventName">Loading...</strong>. Live AI lifecycle roadmap.</p>
         </div>
         <div class="topbar-actions">
-          <button class="btn btn-ghost" onclick="generateAiPlan()"><i class="fa-solid fa-rotate"></i> Regenerate with AI</button>
+          <button class="btn btn-ghost" onclick="generateAiPlan()"><i class="fa-solid fa-sparkles" style="color:var(--cyan);"></i> Regenerate with Gemini</button>
           <button class="btn btn-primary" onclick="openAddTaskModal()"><i class="fa-solid fa-plus"></i> Add Task</button>
         </div>
       </header>
+
+      <!-- Event Selector Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); border:1px solid var(--border); padding:12px 18px; border-radius:12px; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <i class="fa-solid fa-calendar-check" style="color:var(--cyan); font-size:18px;"></i>
+          <label for="plannerEventSelect" style="font-size:13px; color:var(--text-1); font-weight:600;">Active Event Plan:</label>
+          <select id="plannerEventSelect" style="background:var(--bg-card-2); color:var(--text-0); border:1px solid var(--border-strong); padding:7px 14px; border-radius:8px; font-weight:600; font-size:13.5px; cursor:pointer; min-width:260px;"></select>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="plannerEventMeta" style="font-size:12.5px; color:var(--text-2);"></span>
+          <button class="btn btn-ghost btn-sm" onclick="generateAiPlan()"><i class="fa-solid fa-brain" style="color:var(--cyan);"></i> Regenerate Tasks with Gemini AI</button>
+        </div>
+      </div>
 
       <!-- 3 Columns for Phases -->
       <div class="grid grid-3">
@@ -109,11 +122,31 @@
 
   <script src="shared.js"></script>
   <script>
+    let currentEventId = '';
+    let currentEvent = null;
     let allTasks = [];
 
-    async function loadPlannerTasks() {
+    async function initPlanner() {
+      await ClubOps.loadEventSelector('plannerEventSelect', (eventId, ev) => {
+        currentEventId = eventId;
+        currentEvent = ev;
+        if (ev) {
+          document.getElementById('plannerEventName').textContent = ev.name;
+          const metaEl = document.getElementById('plannerEventMeta');
+          if (metaEl) {
+            metaEl.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${ClubOps.escapeHtml(ev.venue || 'Venue')} &bull; <i class="fa-solid fa-calendar"></i> ${ClubOps.escapeHtml(ev.date || 'TBD')}`;
+          }
+        }
+        loadPlannerTasks(currentEventId);
+      });
+    }
+
+    async function loadPlannerTasks(eventId) {
+      if (!eventId) eventId = currentEventId || ClubOps.getActiveEventId();
+      if (!eventId) return;
+
       try {
-        const res = await ClubOps.api.get('/api/tasks?eventId=felicific-2026');
+        const res = await ClubOps.api.get(`/api/tasks?eventId=${eventId}`);
         allTasks = res.data || [];
         renderPhases();
       } catch (e) {
@@ -131,17 +164,25 @@
       document.getElementById('badgeDayCount').textContent = `${day.length} tasks`;
       document.getElementById('badgeAfterCount').textContent = `${after.length} tasks`;
 
-      renderTaskColumn('colBeforeTasks', before);
-      renderTaskColumn('colDayTasks', day);
-      renderTaskColumn('colAfterTasks', after);
+      renderTaskColumn('colBeforeTasks', before, 'Before Event');
+      renderTaskColumn('colDayTasks', day, 'Event Day');
+      renderTaskColumn('colAfterTasks', after, 'After Event');
     }
 
-    function renderTaskColumn(containerId, tasks) {
+    function renderTaskColumn(containerId, tasks, phaseName) {
       const container = document.getElementById(containerId);
       if (!container) return;
 
       if (tasks.length === 0) {
-        container.innerHTML = `<div style="color:var(--text-3); font-size:12px; padding:16px; text-align:center;">No tasks in this phase yet.</div>`;
+        container.innerHTML = `
+          <div style="color:var(--text-3); font-size:12.5px; padding:24px 16px; text-align:center; border:1px dashed var(--border); border-radius:10px;">
+            <i class="fa-solid fa-list-check" style="font-size:20px; opacity:0.4; margin-bottom:8px; display:block;"></i>
+            No tasks in ${phaseName}.
+            <div style="margin-top:10px;">
+              <button class="btn btn-ghost btn-xs" onclick="generateAiPlan()"><i class="fa-solid fa-sparkles"></i> Generate with Gemini</button>
+            </div>
+          </div>
+        `;
         return;
       }
 
@@ -153,7 +194,7 @@
           <div class="task-card ${isDone ? 'done' : ''}">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
               <strong style="font-size:13px; color:var(--text-0);">${ClubOps.escapeHtml(t.title)}</strong>
-              <button onclick="toggleTask('${t.id}', '${isDone ? 'Pending' : 'Completed'}')" style="color:${isDone ? 'var(--green)' : 'var(--text-3)'}; font-size:16px;">
+              <button onclick="toggleTask('${t.id}', '${isDone ? 'Pending' : 'Completed'}')" style="color:${isDone ? 'var(--green)' : 'var(--text-3)'}; font-size:16px; cursor:pointer; background:none; border:none;">
                 <i class="fa-${isDone ? 'solid fa-circle-check' : 'regular fa-circle'}"></i>
               </button>
             </div>
@@ -171,7 +212,7 @@
       try {
         await ClubOps.api.put(`/api/tasks/${id}`, { status: nextStatus });
         ClubOps.toast(`Task marked ${nextStatus}!`, 'success');
-        loadPlannerTasks();
+        loadPlannerTasks(currentEventId);
       } catch (e) {
         ClubOps.toast('Failed to update task', 'error');
       }
@@ -186,7 +227,7 @@
           </div>
           <div class="field">
             <label>Assigned Lead</label>
-            <input type="text" id="modalTaskOwner" value="Rahul Sharma">
+            <input type="text" id="modalTaskOwner" value="Organizing Committee">
           </div>
           <div class="field">
             <label>Operational Phase</label>
@@ -229,10 +270,10 @@
 
               if (!title) return;
               await ClubOps.api.post('/api/tasks', {
-                eventId: 'felicific-2026', title, owner, phase, priority, deadline, status: 'Pending'
+                eventId: currentEventId, title, owner, phase, priority, deadline, status: 'Pending'
               });
               ClubOps.toast('Task created successfully!', 'success');
-              loadPlannerTasks();
+              loadPlannerTasks(currentEventId);
             }
           }
         ]
@@ -240,25 +281,31 @@
     }
 
     async function generateAiPlan() {
+      const evName = currentEvent?.name || 'Current Event';
       ClubOps.aiLoader.show([
-        'Analyzing Felicific 2026 requirements...',
-        'Cross-referencing past year club memory...',
-        'Structuring 3-phase timeline...',
-        'Applying to database...'
+        `Extracting ${evName} description and special requirements...`,
+        'Analyzing venue logistics and designated department leads...',
+        'Synthesizing custom 3-phase tasks with Google Gemini AI...',
+        'Updating database and refreshing board...'
       ]);
 
       try {
-        const res = await ClubOps.api.post('/api/ai/generate-plan', { eventName: 'Felicific 2026', type: 'Cultural & Tech' });
+        const res = await ClubOps.api.post(`/api/events/${currentEventId}/ai-plan`);
         ClubOps.aiLoader.hide();
-        ClubOps.toast('AI generated master plan!', 'success');
-        loadPlannerTasks();
+        if (res.success) {
+          ClubOps.toast(`Gemini AI generated ${res.tasks.length} dynamic tasks!`, 'success');
+          allTasks = res.tasks;
+          renderPhases();
+        } else {
+          ClubOps.toast(res.message || 'Could not generate plan', 'error');
+        }
       } catch (e) {
         ClubOps.aiLoader.hide();
-        ClubOps.toast('Error generating plan', 'error');
+        ClubOps.toast('Error generating plan with Gemini: ' + e.message, 'error');
       }
     }
 
-    document.addEventListener('DOMContentLoaded', loadPlannerTasks);
+    document.addEventListener('DOMContentLoaded', initPlanner);
   </script>
 </body>
 </html>

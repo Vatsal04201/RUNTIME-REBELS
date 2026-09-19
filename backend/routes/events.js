@@ -6,7 +6,7 @@ const gemini = require('../services/geminiService');
 // GET /api/events - List all events
 router.get('/', async (req, res) => {
   try {
-    const events = await all('SELECT * FROM events ORDER BY date ASC');
+    const events = await all('SELECT * FROM events ORDER BY createdAt DESC, date ASC');
     res.json({ success: true, data: events });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -228,6 +228,82 @@ router.delete('/:id', async (req, res) => {
     await run('DELETE FROM risks WHERE eventId = ?', [id]);
     await run('DELETE FROM activity WHERE eventId = ?', [id]);
     res.json({ success: true, message: `Event ${id} deleted successfully` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/events/preview-tasks - Generate preview tasks with Gemini on-the-fly without saving
+router.post('/preview-tasks', async (req, res) => {
+  try {
+    const geminiResult = await gemini.generateEventTasksWithGemini(req.body);
+    if (geminiResult && Array.isArray(geminiResult.tasks) && geminiResult.tasks.length > 0) {
+      return res.json({ success: true, summary: geminiResult.summary, tasks: geminiResult.tasks });
+    }
+    res.json({ success: false, message: 'Could not generate preview tasks' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/events/:id/ai-plan - Regenerate tasks using Gemini for an existing event
+router.post('/:id/ai-plan', async (req, res) => {
+  try {
+    const event = await get('SELECT * FROM events WHERE id = ?', [req.params.id]);
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    const vols = await all('SELECT * FROM volunteers WHERE eventId = ?', [req.params.id]);
+    const photoLead = vols.find(v => v.role && v.role.includes('Photo'))?.name || '';
+    const soundLead = vols.find(v => v.role && (v.role.includes('Sound') || v.role.includes('Audio')))?.name || '';
+    const regLead = vols.find(v => v.role && v.role.includes('Registration'))?.name || '';
+    const stageLead = vols.find(v => v.role && v.role.includes('Stage'))?.name || '';
+
+    const geminiResult = await gemini.generateEventTasksWithGemini({
+      name: event.name,
+      type: event.type,
+      date: event.date,
+      venue: event.venue,
+      guests: event.guests,
+      volunteers: event.volunteers,
+      budget: event.budget,
+      description: event.description,
+      requirements: event.requirements,
+      photographyLead: photoLead,
+      soundLead: soundLead,
+      registrationLead: regLead,
+      stageLead: stageLead
+    });
+
+    let customTasks = [];
+    let aiSummary = '';
+    if (geminiResult && Array.isArray(geminiResult.tasks) && geminiResult.tasks.length > 0) {
+      customTasks = geminiResult.tasks;
+      aiSummary = geminiResult.summary;
+    }
+
+    if (customTasks.length > 0) {
+      // Clear old tasks for this event
+      await run('DELETE FROM tasks WHERE eventId = ?', [req.params.id]);
+
+      for (let j = 0; j < customTasks.length; j++) {
+        const t = customTasks[j];
+        const taskId = `t-${Date.now()}-${j}`;
+        await run(`
+          INSERT INTO tasks (id, eventId, title, owner, priority, deadline, phase, status, extractedByAi)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [taskId, req.params.id, t.title, t.owner || 'Club Team', t.priority || 'Medium', t.deadline || 'Event Day', t.phase || 'Before Event', 'Pending', 1]);
+      }
+    }
+
+    const updatedTasks = await all('SELECT * FROM tasks WHERE eventId = ? ORDER BY createdAt DESC', [req.params.id]);
+
+    res.json({
+      success: true,
+      summary: aiSummary || `Gemini generated ${customTasks.length} tasks for ${event.name}`,
+      tasks: updatedTasks
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

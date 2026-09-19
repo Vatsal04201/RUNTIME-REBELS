@@ -203,8 +203,11 @@
               </div>
             </div>
 
-            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
               <button type="reset" class="btn btn-ghost">Clear</button>
+              <button type="button" class="btn btn-ghost" onclick="previewAiTasks()" id="btnPreview">
+                <i class="fa-solid fa-brain" style="color:var(--cyan);"></i> Preview AI Tasks
+              </button>
               <button type="submit" class="btn btn-primary" id="btnSubmit">
                 <i class="fa-solid fa-sparkles"></i> Create & Generate AI Plan
               </button>
@@ -216,11 +219,11 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title"><i class="fa-solid fa-brain"></i> Autonomous Operations Engine</div>
-            <span class="badge badge-cyan">Proactive AI</span>
+            <span class="badge badge-cyan">Gemini AI</span>
           </div>
 
           <div style="padding: 10px 0; color: var(--text-1); font-size: 13.5px; line-height: 1.6;">
-            When you create this event with your chosen team leads, <strong>ClubOps AI</strong> will automatically:
+            When you create this event with your chosen team leads, <strong>Google Gemini AI</strong> will automatically:
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 14px; margin: 16px 0;">
@@ -246,11 +249,11 @@
           </div>
 
           <div id="aiPlanPreview" style="display: none; background: rgba(34, 211, 238, 0.06); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 12px; padding: 16px; margin-top: 14px;">
-            <div style="font-weight: 700; color: var(--cyan); margin-bottom: 8px;"><i class="fa-solid fa-circle-check"></i> Event Successfully Initialized!</div>
+            <div style="font-weight: 700; color: var(--cyan); margin-bottom: 8px;" id="aiPlanStatusHead"><i class="fa-solid fa-circle-check"></i> Event Successfully Initialized!</div>
             <div id="aiPlanText" style="font-size: 12.5px; color: var(--text-1); line-height: 1.6;"></div>
             <div style="display:flex; gap:10px; margin-top:14px;">
               <a href="volunteers.html" class="btn btn-ghost btn-sm"><i class="fa-solid fa-people-group"></i> View Volunteer Roster</a>
-              <a href="event-planner.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-wand-magic-sparkles"></i> Open Event Planner</a>
+              <a href="event-planner.html" class="btn btn-primary btn-sm" id="btnOpenPlanner"><i class="fa-solid fa-wand-magic-sparkles"></i> Open Event Planner</a>
             </div>
           </div>
         </div>
@@ -338,18 +341,29 @@
         ClubOps.aiLoader.hide();
         ClubOps.toast(`Event "${name}" created with Gemini AI lifecycle tasks!`, 'success');
 
+        if (res.data && res.data.id) {
+          ClubOps.setActiveEventId(res.data.id);
+          const btnPlanner = document.getElementById('btnOpenPlanner');
+          if (btnPlanner) {
+            btnPlanner.href = `event-planner.html?eventId=${res.data.id}`;
+          }
+        }
+
         const preview = document.getElementById('aiPlanPreview');
         const planText = document.getElementById('aiPlanText');
+        const headEl = document.getElementById('aiPlanStatusHead');
+        if (headEl) headEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--green);"></i> ${ClubOps.escapeHtml(name)} Initialized with Gemini AI!`;
+
         if (preview && planText) {
           preview.style.display = 'block';
-          const tasksList = res.tasks ? res.tasks.map(t => `<div style="font-size:12.5px; margin-top:5px; color:var(--text-1);"><span class="badge ${t.phase === 'Before Event' ? 'badge-blue' : (t.phase === 'Event Day' ? 'badge-green' : 'badge-purple')}">${t.phase}</span> <strong>${ClubOps.escapeHtml(t.title)}</strong> <span style="color:var(--cyan);">[${ClubOps.escapeHtml(t.owner)}]</span></div>`).join('') : '';
+          const tasksList = res.tasks ? res.tasks.map(t => `<div style="font-size:12.5px; margin-top:6px; color:var(--text-1);"><span class="badge ${t.phase === 'Before Event' ? 'badge-blue' : (t.phase === 'Event Day' ? 'badge-green' : 'badge-purple')}">${t.phase}</span> <strong>${ClubOps.escapeHtml(t.title)}</strong> <span style="color:var(--cyan);">[${ClubOps.escapeHtml(t.owner)}]</span> <span style="font-size:11px; color:var(--text-2); margin-left:4px;">(${t.deadline || 'Event Day'})</span></div>`).join('') : '';
 
           planText.innerHTML = `
             <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;"><i class="fa-solid fa-brain"></i> ${ClubOps.escapeHtml(res.aiSummary || 'Gemini AI generated operational lifecycle plan')}</div>
             <div>• Registered <strong>${volunteers} volunteers</strong> with assigned leads: <strong>${photographyLead || 'Media Team'}</strong> (Photo), <strong>${soundLead || 'Audio Tech'}</strong> (Sound).</div>
             <div>• Created <strong>${services.length} vendor contracts</strong> (${services.join(', ')}).</div>
-            <div style="margin-top:6px;">• Gemini generated <strong>${res.tasksCount || 10} lifecycle tasks</strong> across Before, During, and After phases:</div>
-            <div style="margin-top:10px; max-height:220px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.25); border-radius:8px; border:1px solid var(--border);">
+            <div style="margin-top:6px; font-weight:600; color:var(--text-0);">• Gemini generated <strong>${res.tasksCount || 10} lifecycle tasks</strong> across Before, During, and After phases:</div>
+            <div style="margin-top:10px; max-height:240px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--border);">
               ${tasksList}
             </div>
           `;
@@ -361,6 +375,68 @@
       } catch (err) {
         ClubOps.aiLoader.hide();
         ClubOps.toast('Error creating event: ' + err.message, 'error');
+      }
+    }
+
+    async function previewAiTasks() {
+      const name = document.getElementById('eventName').value.trim();
+      const type = document.getElementById('eventType').value;
+      const date = document.getElementById('eventDate').value;
+      const venue = document.getElementById('eventVenue').value.trim() || 'Auditorium';
+      const guests = +document.getElementById('expectedGuests').value || 100;
+      const volunteers = +document.getElementById('volunteersCount').value || 20;
+      const budget = +document.getElementById('eventBudget').value || 50000;
+      const description = document.getElementById('eventDesc').value.trim();
+      const requirements = document.getElementById('eventReq').value.trim();
+      const photographyLead = document.getElementById('photographyLead').value.trim();
+      const soundLead = document.getElementById('soundLead').value.trim();
+      const registrationLead = document.getElementById('registrationLead').value.trim();
+      const stageLead = document.getElementById('stageLead').value.trim();
+      const services = Array.from(document.querySelectorAll('input[name="services"]:checked')).map(cb => cb.value);
+
+      if (!name) {
+        return ClubOps.toast('Please enter an Event Name to preview tasks', 'warn');
+      }
+
+      ClubOps.aiLoader.show([
+        `Ingesting "${name}" description and parameters...`,
+        'Passing requirements and designated department leads to Gemini...',
+        'Generating dynamic 3-phase operational breakdown...'
+      ]);
+
+      try {
+        const res = await ClubOps.api.post('/api/events/preview-tasks', {
+          name, type, date, venue, guests, volunteers, budget,
+          description, requirements, photographyLead, soundLead,
+          registrationLead, stageLead, services
+        });
+        ClubOps.aiLoader.hide();
+
+        if (res.success && Array.isArray(res.tasks)) {
+          ClubOps.toast(`Gemini generated ${res.tasks.length} tasks from your description!`, 'success');
+          const preview = document.getElementById('aiPlanPreview');
+          const planText = document.getElementById('aiPlanText');
+          const headEl = document.getElementById('aiPlanStatusHead');
+          if (headEl) headEl.innerHTML = `<i class="fa-solid fa-brain" style="color:var(--cyan);"></i> Gemini Preview: ${ClubOps.escapeHtml(name)}`;
+          if (preview && planText) {
+            preview.style.display = 'block';
+            const tasksList = res.tasks.map(t => `<div style="font-size:12.5px; margin-top:6px; color:var(--text-1);"><span class="badge ${t.phase === 'Before Event' ? 'badge-blue' : (t.phase === 'Event Day' ? 'badge-green' : 'badge-purple')}">${t.phase}</span> <strong>${ClubOps.escapeHtml(t.title)}</strong> <span style="color:var(--cyan);">[${ClubOps.escapeHtml(t.owner)}]</span> <span style="font-size:11px; color:var(--text-2); margin-left:4px;">(${t.deadline || 'Event Day'})</span></div>`).join('');
+
+            planText.innerHTML = `
+              <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">${ClubOps.escapeHtml(res.summary || 'Live Gemini AI Task Analysis')}</div>
+              <div style="margin-top:6px; font-weight:600; color:var(--text-0);">Generated ${res.tasks.length} Operational Tasks:</div>
+              <div style="margin-top:10px; max-height:260px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--border);">
+                ${tasksList}
+              </div>
+              <div style="margin-top:10px; font-size:12px; color:var(--text-2);"><i class="fa-solid fa-circle-info"></i> Click "Create & Generate AI Plan" to save this event and all tasks into the database.</div>
+            `;
+          }
+        } else {
+          ClubOps.toast('Could not generate preview tasks', 'error');
+        }
+      } catch (err) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Error generating preview: ' + err.message, 'error');
       }
     }
 

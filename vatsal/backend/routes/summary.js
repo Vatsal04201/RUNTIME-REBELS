@@ -5,10 +5,9 @@ const { run, get, all } = require('../database/database');
 // GET /api/dashboard/summary
 router.get('/', async (req, res) => {
   try {
-    const eventId = 'felicific-2026';
-
-    const events = await all('SELECT * FROM events');
-    const featuredEvent = await get('SELECT * FROM events WHERE id = ?', [eventId]) || events[0];
+    const events = await all('SELECT * FROM events ORDER BY createdAt DESC');
+    const eventId = req.query.eventId || (events[0] ? events[0].id : 'felicific-2026');
+    const featuredEvent = (await get('SELECT * FROM events WHERE id = ?', [eventId])) || events[0];
 
     const tasks = await all('SELECT * FROM tasks WHERE eventId = ?', [eventId]);
     const vendors = await all('SELECT * FROM vendors WHERE eventId = ?', [eventId]);

@@ -314,6 +314,63 @@
     return '₹' + Number(num || 0).toLocaleString('en-IN');
   }
 
+  function getActiveEventId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramId = urlParams.get('eventId');
+    if (paramId) {
+      localStorage.setItem('clubops_active_event_id', paramId);
+      return paramId;
+    }
+    return localStorage.getItem('clubops_active_event_id') || '';
+  }
+
+  function setActiveEventId(id) {
+    if (id) {
+      localStorage.setItem('clubops_active_event_id', id);
+    }
+  }
+
+  async function loadEventSelector(selectId, onSelectCallback) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    try {
+      const res = await api.get('/api/events');
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        select.innerHTML = '';
+        let currentId = getActiveEventId();
+        const exists = res.data.some(e => e.id === currentId);
+        if (!currentId || !exists) {
+          currentId = res.data[0].id;
+          setActiveEventId(currentId);
+        }
+
+        res.data.forEach(ev => {
+          const opt = document.createElement('option');
+          opt.value = ev.id;
+          opt.textContent = `${ev.name} (${ev.date || 'TBD'})`;
+          if (ev.id === currentId) opt.selected = true;
+          select.appendChild(opt);
+        });
+
+        select.onchange = (e) => {
+          const newId = e.target.value;
+          setActiveEventId(newId);
+          if (typeof onSelectCallback === 'function') {
+            const selectedEvent = res.data.find(ev => ev.id === newId);
+            onSelectCallback(newId, selectedEvent);
+          }
+        };
+
+        if (typeof onSelectCallback === 'function') {
+          const selectedEvent = res.data.find(ev => ev.id === currentId);
+          onSelectCallback(currentId, selectedEvent);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load events for selector:', e);
+    }
+  }
+
   // Export ClubOps global namespace
   global.ClubOps = {
     NAV,
@@ -323,7 +380,10 @@
     aiLoader,
     api,
     escapeHtml,
-    formatCurrency
+    formatCurrency,
+    getActiveEventId,
+    setActiveEventId,
+    loadEventSelector
   };
 
   document.addEventListener('DOMContentLoaded', () => {

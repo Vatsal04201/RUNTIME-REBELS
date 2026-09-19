@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Event Readiness</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .gauge-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .readiness-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin: 14px 0 8px;
+      background: linear-gradient(135deg, var(--cyan), var(--indigo));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 84%;
+      background: linear-gradient(90deg, var(--cyan), var(--indigo));
+      border-radius: 20px;
+      transition: width 0.8s ease;
+      box-shadow: 0 0 16px var(--cyan);
+    }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(10, 14, 26, 0.6);
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body data-page="readiness">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h1><i class="fa-solid fa-gauge" style="color:var(--cyan);"></i> Mathematical Event Readiness Audit <span class="badge-ai">Live Engine</span></h1>
+          <p>Deterministic composite score calculated from actual task completions, confirmed vendor contracts, and volunteer allocations.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="loadReadinessData()"><i class="fa-solid fa-rotate"></i> Recalculate Live Score</button>
+        </div>
+      </header>
+
+      <div class="grid grid-2">
+        <!-- Big Gauge Card -->
+        <div class="gauge-card card-glow">
+          <span class="badge badge-cyan"><i class="fa-solid fa-star"></i> Featured Event: Felicific 2026</span>
+
+          <div class="readiness-number" id="bigReadinessPct">84%</div>
+          <h3 id="readinessStatusHeader" style="color:var(--text-0); font-size:18px;">On Track for Launch</h3>
+          <p style="color:var(--text-2); font-size:13px; max-width:380px; margin:0 auto;">
+            Composite metric computed deterministically across 4 operational asset pillars.
+          </p>
+
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="readinessBarFill"></div>
+          </div>
+
+          <!-- Things Needing Attention -->
+          <div style="text-align: left; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 12px; padding: 16px; margin-top: 18px;">
+            <div style="font-weight: 700; color: #fca5a5; margin-bottom: 8px; font-size: 13.5px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> 2 Critical Assets Pending Attention:
+            </div>
+            <ul style="padding-left: 20px; font-size: 12.5px; color: var(--text-1); line-height: 1.6;">
+              <li><strong>Sound System:</strong> SoundCraft Audio Solutions contract pending confirmation.</li>
+              <li><strong>Volunteers:</strong> 2 leads unassigned on Stage Management backstage team.</li>
+            </ul>
+            <div style="margin-top: 12px; text-align: right;">
+              <a href="vendors.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Confirm Sound Vendor (+7%)</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar Breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Mathematical Formula Weights</div>
+            <span class="card-sub">Weighted 100-Point Model</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Pillar 1 -->
+            <div class="breakdown-row">
+              <div>
+                <strong style="color:var(--text-0);"><i class="fa-solid fa-list-check" style="color:var(--cyan); margin-right:6px;"></i> Operational Tasks (40% Weight)</strong>
+                <div style="font-size:11.5px; color:var(--text-2);" id="breakdownTaskInfo">17/22 tasks completed</div>
+              </div>
+              <span class="badge badge-green" id="scoreTasks">31 / 40 pts</span>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div class="breakdown-row">
+              <div>
+                <strong style="color:var(--text-0);"><i class="fa-solid fa-truck" style="color:var(--purple); margin-right:6px;"></i> Confirmed Vendors (25% Weight)</strong>
+                <div style="font-size:11.5px; color:var(--text-2);" id="breakdownVendorInfo">5/6 vendors confirmed</div>
+              </div>
+              <span class="badge badge-amber" id="scoreVendors">21 / 25 pts</span>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div class="breakdown-row">
+              <div>
+                <strong style="color:var(--text-0);"><i class="fa-solid fa-users" style="color:var(--blue); margin-right:6px;"></i> Volunteer Allocations (25% Weight)</strong>
+                <div style="font-size:11.5px; color:var(--text-2);" id="breakdownVolInfo">18/20 leads assigned to zones</div>
+              </div>
+              <span class="badge badge-cyan" id="scoreVolunteers">23 / 25 pts</span>
+            </div>
+
+            <!-- Pillar 4 -->
+            <div class="breakdown-row">
+              <div>
+                <strong style="color:var(--text-0);"><i class="fa-solid fa-building-columns" style="color:var(--green); margin-right:6px;"></i> Administrative Baseline (10% Weight)</strong>
+                <div style="font-size:11.5px; color:var(--text-2);">Auditorium booking, Dean letter proposal sanctioned</div>
+              </div>
+              <span class="badge badge-green">10 / 10 pts</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; padding: 14px; background: rgba(34, 211, 238, 0.06); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 10px; font-size: 12.5px; color: var(--text-1); line-height: 1.6;">
+            <strong>💡 AI Optimization Tip:</strong> Completing the 5 pending preparation tasks will raise overall readiness to <strong>94%</strong>. Confirming the Sound vendor pushes readiness to <strong>100%</strong>.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    async function loadReadinessData() {
+      try {
+        const res = await ClubOps.api.get('/api/readiness/felicific-2026');
+        if (res.success && res.data) {
+          const d = res.data;
+          document.getElementById('bigReadinessPct').textContent = `${d.percentage}%`;
+          document.getElementById('readinessBarFill').style.width = `${d.percentage}%`;
+          document.getElementById('readinessStatusHeader').textContent = d.status;
+
+          const bd = d.breakdown;
+          if (bd) {
+            document.getElementById('breakdownTaskInfo').textContent = `${bd.tasks.completed}/${bd.tasks.total} tasks completed`;
+            document.getElementById('scoreTasks').textContent = `${bd.tasks.score} / ${bd.tasks.weight} pts`;
+
+            document.getElementById('breakdownVendorInfo').textContent = `${bd.vendors.confirmed}/${bd.vendors.total} vendors confirmed`;
+            document.getElementById('scoreVendors').textContent = `${bd.vendors.score} / ${bd.vendors.weight} pts`;
+
+            document.getElementById('breakdownVolInfo').textContent = `${bd.volunteers.assigned}/${bd.volunteers.total} volunteers assigned`;
+            document.getElementById('scoreVolunteers').textContent = `${bd.volunteers.score} / ${bd.volunteers.weight} pts`;
+          }
+        }
+      } catch (err) {
+        ClubOps.toast('Error calculating readiness', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadReadinessData);
+  </script>
+</body>
+</html>

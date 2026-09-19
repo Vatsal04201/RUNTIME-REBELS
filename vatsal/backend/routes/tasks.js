@@ -1,99 +1,141 @@
 const express = require('express');
 const router = express.Router();
-const { readData, writeData } = require('../dataStore');
+const { run, get, all } = require('../database/database');
 
-// GET /api/tasks
-router.get('/', (req, res) => {
-  let tasks = readData('tasks');
-  const { eventId, isToday } = req.query;
+// GET /api/tasks - List tasks (filter by eventId, phase, status)
+router.get('/', async (req, res) => {
+  try {
+    const { eventId, status, phase } = req.query;
+    let sql = 'SELECT * FROM tasks WHERE 1=1';
+    const params = [];
 
-  if (eventId) {
-    tasks = tasks.filter(t => t.eventId === eventId);
+    if (eventId) {
+      sql += ' AND eventId = ?';
+      params.push(eventId);
+    }
+    if (status) {
+      sql += ' AND status = ?';
+      params.push(status);
+    }
+    if (phase) {
+      sql += ' AND phase = ?';
+      params.push(phase);
+    }
+
+    sql += ' ORDER BY createdAt DESC';
+    const tasks = await all(sql, params);
+
+    // Map compatibility fields for DeepSeek dashboard
+    const formatted = tasks.map(t => ({
+      ...t,
+      name: t.title,
+      assignee: t.owner,
+      dueDate: t.deadline,
+      isToday: t.deadline === 'Today'
+    }));
+
+    res.json({ success: true, data: formatted });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-  if (isToday === 'true') {
-    tasks = tasks.filter(t => t.isToday === true);
-  }
-
-  const completed = tasks.filter(t => t.status === 'completed').length;
-  const pending = tasks.length - completed;
-
-  res.json({
-    success: true,
-    total: tasks.length,
-    completed,
-    pending,
-    data: tasks
-  });
 });
 
-// POST /api/tasks
-router.post('/', (req, res) => {
-  const tasks = readData('tasks');
-  const newTask = {
-    id: req.body.id || `task-${Date.now()}`,
-    name: req.body.name || 'Untitled Task',
-    assignee: req.body.assignee || 'Unassigned',
-    status: req.body.status || 'pending',
-    priority: req.body.priority || 'medium',
-    dueDate: req.body.dueDate || 'Today',
-    isToday: req.body.isToday !== undefined ? Boolean(req.body.isToday) : true,
-    eventId: req.body.eventId || 'felicific-2026'
-  };
+// POST /api/tasks - Create task
+router.post('/', async (req, res) => {
+  try {
+    const {
+      eventId = 'felicific-2026',
+      title,
+      name,
+      owner = 'Club Team',
+      assignee,
+      priority = 'Medium',
+      deadline = 'Tomorrow',
+      dueDate,
+      phase = 'Before Event',
+      status = 'Pending',
+      extractedByAi = 0
+    } = req.body;
 
-  tasks.push(newTask);
-  writeData('tasks', tasks);
-  res.status(201).json({ success: true, data: newTask });
+    const taskTitle = title || name;
+    if (!taskTitle) {
+      return res.status(400).json({ success: false, message: 'Task title is required' });
+    }
+
+    const taskOwner = owner || assignee || 'Club Team';
+    const taskDeadline = deadline || dueDate || 'Tomorrow';
+    const id = `t-${Date.now()}`;
+
+    await run(`
+      INSERT INTO tasks (id, eventId, title, owner, priority, deadline, phase, status, extractedByAi)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [id, eventId, taskTitle, taskOwner, priority, taskDeadline, phase, status, extractedByAi ? 1 : 0]);
+
+    await run(`
+      INSERT INTO activity (id, eventId, text, time, dot, timestamp)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [`act-${Date.now()}`, eventId, `Added task: <strong>${taskTitle}</strong> for ${taskOwner}`, 'Just now', 'purple', Date.now()]);
+
+    const created = await get('SELECT * FROM tasks WHERE id = ?', [id]);
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
-// PUT /api/tasks/:id (toggle completion, update details)
-router.put('/:id', (req, res) => {
-  const tasks = readData('tasks');
-  const taskIndex = tasks.findIndex(t => t.id === req.params.id);
+// PUT /api/tasks/:id - Update task status / details
+router.put('/:id', async (req, res) => {
+  try {
+    const { status, title, name, owner, assignee, priority, deadline, dueDate } = req.body;
+    const task = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'Task not found' });
+    }
 
-  if (taskIndex === -1) {
-    return res.status(404).json({ success: false, message: 'Task not found' });
-  }
+    const nextStatus = status ? (status.toLowerCase() === 'completed' ? 'Completed' : 'Pending') : task.status;
+    const nextTitle = title || name || task.title;
+    const nextOwner = owner || assignee || task.owner;
+    const nextPriority = priority || task.priority;
+    const nextDeadline = deadline || dueDate || task.deadline;
 
-  // Merge updates
-  const existing = tasks[taskIndex];
-  const updatedTask = {
-    ...existing,
-    ...req.body,
-    id: existing.id // preserve ID
-  };
+    await run(`
+      UPDATE tasks
+      SET status = ?, title = ?, owner = ?, priority = ?, deadline = ?
+      WHERE id = ?
+    `, [nextStatus, nextTitle, nextOwner, nextPriority, nextDeadline, req.params.id]);
 
-  tasks[taskIndex] = updatedTask;
-  writeData('tasks', tasks);
+    // Log status toggle in activity
+    if (status && nextStatus !== task.status) {
+      await run(`
+        INSERT INTO activity (id, eventId, text, time, dot, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `, [`act-${Date.now()}`, task.eventId, `Task marked ${nextStatus.toLowerCase()}: <strong>${nextTitle}</strong>`, 'Just now', nextStatus === 'Completed' ? 'green' : 'cyan', Date.now()]);
+    }
 
-  // If status changed to completed, record to activity log!
-  if (req.body.status === 'completed' && existing.status !== 'completed') {
-    const activities = readData('activity');
-    activities.unshift({
-      id: `act-${Date.now()}`,
-      text: `<strong>${updatedTask.assignee || 'Team member'}</strong> completed task: "${updatedTask.name}"`,
-      time: 'Just now',
-      dot: 'cyan',
-      timestamp: Date.now()
+    const updated = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    res.json({
+      success: true,
+      data: {
+        ...updated,
+        name: updated.title,
+        assignee: updated.owner,
+        dueDate: updated.deadline,
+        isToday: updated.deadline === 'Today'
+      }
     });
-    writeData('activity', activities.slice(0, 20));
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-
-  res.json({ success: true, data: updatedTask });
 });
 
 // DELETE /api/tasks/:id
-router.delete('/:id', (req, res) => {
-  let tasks = readData('tasks');
-  const exists = tasks.some(t => t.id === req.params.id);
-
-  if (!exists) {
-    return res.status(404).json({ success: false, message: 'Task not found' });
+router.delete('/:id', async (req, res) => {
+  try {
+    await run('DELETE FROM tasks WHERE id = ?', [req.params.id]);
+    res.json({ success: true, message: 'Task deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-
-  tasks = tasks.filter(t => t.id !== req.params.id);
-  writeData('tasks', tasks);
-
-  res.json({ success: true, message: 'Task deleted successfully' });
 });
 
 module.exports = router;

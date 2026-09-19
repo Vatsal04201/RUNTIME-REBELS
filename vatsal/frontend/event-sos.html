@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Event SOS Crisis Solver</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .sos-header {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(20, 26, 46, 0.95));
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .preset-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .preset-card:hover {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+      transform: translateY(-2px);
+    }
+    .protocol-card {
+      background: rgba(15, 20, 36, 0.9);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-top: 20px;
+    }
+    .step-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--cyan);
+      color: #000;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+    .contact-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body data-page="sos">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <div class="sos-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> CRISIS MITIGATION ENGINE</span>
+            <span style="color:var(--text-2); font-size:13px;">• Live Incident Commander</span>
+          </div>
+          <h1 style="font-size:26px; font-weight:800; color:var(--text-0); margin:0;">Event SOS — AI Operational Crisis Solver</h1>
+          <p style="color:var(--text-1); font-size:13.5px; margin-top:4px;">
+            Instant action protocols, backup contingencies, and team dispatches for real-time event failures.
+          </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="event-day.html" class="btn btn-ghost"><i class="fa-solid fa-satellite-dish"></i> Return to Command Room</a>
+        </div>
+      </div>
+
+      <!-- Quick Preset Emergency Buttons -->
+      <div style="margin-bottom: 12px; font-size: 13px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em;">
+        Select an active emergency or describe your issue:
+      </div>
+
+      <div class="grid grid-3" style="margin-bottom: 24px;">
+        <div class="preset-card" onclick="triggerCrisis('sound_failure')">
+          <div style="font-size:24px; color:#ef4444;"><i class="fa-solid fa-microphone-slash"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--text-0);">Microphone / Audio Failure</div>
+            <div style="font-size:12px; color:var(--text-2);">Podium mic feedback or dead batteries</div>
+          </div>
+        </div>
+
+        <div class="preset-card" onclick="triggerCrisis('speaker_cancel')">
+          <div style="font-size:24px; color:#f59e0b;"><i class="fa-solid fa-user-xmark"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--text-0);">Keynote Speaker Cancelled</div>
+            <div style="font-size:12px; color:var(--text-2);">45-minute schedule gap on main stage</div>
+          </div>
+        </div>
+
+        <div class="preset-card" onclick="triggerCrisis('power_outage')">
+          <div style="font-size:24px; color:#ef4444;"><i class="fa-solid fa-bolt-lightning"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--text-0);">Campus Power Fluctuation</div>
+            <div style="font-size:12px; color:var(--text-2);">Stage lighting or mixer tripped</div>
+          </div>
+        </div>
+
+        <div class="preset-card" onclick="triggerCrisis('gate_rush')">
+          <div style="font-size:24px; color:#3b82f6;"><i class="fa-solid fa-people-robbery"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--text-0);">Main Gate Overcrowding</div>
+            <div style="font-size:12px; color:var(--text-2);">Queue overflow at Registration Gate A</div>
+          </div>
+        </div>
+
+        <div class="preset-card" onclick="triggerCrisis('catering_delay')">
+          <div style="font-size:24px; color:#a855f7;"><i class="fa-solid fa-utensils"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--text-0);">Dinner Catering Delayed</div>
+            <div style="font-size:12px; color:var(--text-2);">Food packets not arrived by 8:15 PM</div>
+          </div>
+        </div>
+
+        <div class="preset-card" onclick="triggerCrisis('rain_relocation')">
+          <div style="font-size:24px; color:#22d3ee;"><i class="fa-solid fa-cloud-showers-heavy"></i></div>
+          <div>
+            <div style="font-weight:700; color:var(--text-0);">Sudden Heavy Rainfall</div>
+            <div style="font-size:12px; color:var(--text-2);">Open courtyard booths need relocation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Prompt Card -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-brain" style="color:var(--cyan);"></i> Custom Incident Analyzer</div>
+          <span class="card-sub">AI Real-Time Troubleshooting</span>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <input type="text" class="input" id="customCrisisInput" placeholder="Describe unexpected crisis (e.g. Projector HDMI port broken on stage 2)..." style="flex:1;">
+          <button class="btn btn-primary" onclick="analyzeCustomCrisis()"><i class="fa-solid fa-wand-magic-sparkles"></i> Synthesize Protocol</button>
+        </div>
+      </div>
+
+      <!-- Main Protocol Output Layout -->
+      <div class="grid grid-2" id="protocolSection">
+
+        <!-- Action Plan & Dispatch -->
+        <div class="card card-glow">
+          <div class="card-header">
+            <div>
+              <span class="badge badge-red" id="crisisBadge"><i class="fa-solid fa-circle-exclamation"></i> CRITICAL INCIDENT</span>
+              <h2 style="font-size:18px; color:var(--text-0); margin-top:8px;" id="crisisTitle">Microphone & Audio System Failure on Stage 1</h2>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="copyProtocol()"><i class="fa-solid fa-copy"></i> Copy Protocol</button>
+          </div>
+
+          <div style="margin: 16px 0;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-2); text-transform:uppercase; margin-bottom:10px;">Immediate 3-Step Action Sequence:</div>
+            
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <div>
+                <strong style="color:var(--text-0);" id="step1Title">Switch to Auditorium Internal PA Podium Line</strong>
+                <div style="font-size:12.5px; color:var(--text-1); margin-top:2px;" id="step1Desc">Connect Backup Corded Shure SM58 mic directly into Mixer Channel 4 to bypass wireless UHF receiver feedback.</div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-number">2</div>
+              <div>
+                <strong style="color:var(--text-0);" id="step2Title">Dispatch Technical Lead to Vendor Station</strong>
+                <div style="font-size:12.5px; color:var(--text-1); margin-top:2px;" id="step2Desc">Rahul to verify SoundCraft Audio operator Rajesh Verma's frequency dial and replace 9V battery pair.</div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <div>
+                <strong style="color:var(--text-0);" id="step3Title">Emcee Filler Protocol</strong>
+                <div style="font-size:12.5px; color:var(--text-1); margin-top:2px;" id="step3Desc">Instruct Anchor to transition to audience interactive quiz while audio reset completes (estimated 90 seconds).</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pre-Generated WhatsApp Dispatch -->
+          <div style="background:rgba(10, 14, 26, 0.8); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:12px; font-weight:700; color:var(--cyan);"><i class="fa-brands fa-whatsapp"></i> Pre-Drafted Volunteer Dispatch Message</span>
+              <button class="btn btn-ghost btn-sm" onclick="copyBroadcast()"><i class="fa-solid fa-copy"></i> Copy</button>
+            </div>
+            <pre style="white-space:pre-wrap; font-family:inherit; font-size:12px; color:var(--text-1); line-height:1.5; margin:0;" id="broadcastText">🚨 *OPERATIONAL ALERT: AUDIO BACKUP ENGAGED*
+Tech lead Rahul is switching to Podium Corded Mic 1.
+Anchor team: Execute 2-minute audience quiz transition.
+Logistics: Clear stage center of loose cabling.</pre>
+          </div>
+        </div>
+
+        <!-- Emergency Speed Dial Contacts -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-phone-volume" style="color:var(--green);"></i> Campus Emergency Contacts</div>
+            <span class="badge badge-green">Speed-Dial Ready</span>
+          </div>
+
+          <div class="contact-item">
+            <div>
+              <strong style="color:var(--text-0); font-size:13.5px;">Sound Operator (SoundCraft)</strong>
+              <div style="font-size:11.5px; color:var(--text-2);">Mr. Rajesh Verma • Stage 1 Console</div>
+            </div>
+            <a href="tel:+919876522001" class="btn btn-ghost btn-sm" style="color:var(--cyan);"><i class="fa-solid fa-phone"></i> +91 98765 22001</a>
+          </div>
+
+          <div class="contact-item">
+            <div>
+              <strong style="color:var(--text-0); font-size:13.5px;">Campus Chief Electrician</strong>
+              <div style="font-size:11.5px; color:var(--text-2);">Mr. Ramesh • Substation Room 2</div>
+            </div>
+            <a href="tel:+919876500001" class="btn btn-ghost btn-sm" style="color:var(--cyan);"><i class="fa-solid fa-phone"></i> +91 98765 00001</a>
+          </div>
+
+          <div class="contact-item">
+            <div>
+              <strong style="color:var(--text-0); font-size:13.5px;">Campus Security Control</strong>
+              <div style="font-size:11.5px; color:var(--text-2);">Main Gate A Desk • Walkie Ch. 1</div>
+            </div>
+            <a href="tel:+919876500002" class="btn btn-ghost btn-sm" style="color:var(--cyan);"><i class="fa-solid fa-phone"></i> +91 98765 00002</a>
+          </div>
+
+          <div class="contact-item">
+            <div>
+              <strong style="color:var(--text-0); font-size:13.5px;">Faculty Event Advisor</strong>
+              <div style="font-size:11.5px; color:var(--text-2);">Prof. S. K. Joshi • Director's Office</div>
+            </div>
+            <a href="tel:+919876500003" class="btn btn-ghost btn-sm" style="color:var(--cyan);"><i class="fa-solid fa-phone"></i> +91 98765 00003</a>
+          </div>
+
+          <div class="contact-item">
+            <div>
+              <strong style="color:var(--text-0); font-size:13.5px;">Campus Medical Room</strong>
+              <div style="font-size:11.5px; color:var(--text-2);">Health Centre Building C • First Aid</div>
+            </div>
+            <a href="tel:+919876500004" class="btn btn-ghost btn-sm" style="color:var(--cyan);"><i class="fa-solid fa-phone"></i> +91 98765 00004</a>
+          </div>
+
+          <div style="margin-top:18px; padding:12px; background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.25); border-radius:10px; font-size:12px; color:#fca5a5;">
+            <i class="fa-solid fa-shield-cat"></i> <strong>Pro-Tip:</strong> Campus safety policy mandates reporting any power or medical interruption within 5 minutes to Security Control.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    const CRISIS_DATA = {
+      sound_failure: {
+        badge: 'CRITICAL AUDIO INCIDENT',
+        badgeClass: 'badge-red',
+        title: 'Microphone & Audio System Failure on Stage 1',
+        step1Title: 'Switch to Auditorium Internal PA Podium Line',
+        step1Desc: 'Connect Backup Corded Shure SM58 mic directly into Mixer Channel 4 to bypass wireless UHF receiver feedback.',
+        step2Title: 'Dispatch Technical Lead to Vendor Station',
+        step2Desc: 'Rahul to verify SoundCraft Audio operator Rajesh Verma\'s frequency dial and replace 9V battery pair.',
+        step3Title: 'Emcee Filler Protocol',
+        step3Desc: 'Instruct Anchor to transition to audience interactive quiz while audio reset completes (estimated 90 seconds).',
+        broadcast: '🚨 *OPERATIONAL ALERT: AUDIO BACKUP ENGAGED*\nTech lead Rahul is switching to Podium Corded Mic 1.\nAnchor team: Execute 2-minute audience quiz transition.\nLogistics: Clear stage center of loose cabling.'
+      },
+      speaker_cancel: {
+        badge: 'HIGH SCHEDULE DISRUPTION',
+        badgeClass: 'badge-amber',
+        title: 'Keynote Speaker Cancelled (45-Minute Gap)',
+        step1Title: 'Advance Student Project Lightning Talks',
+        step1Desc: 'Call 2 hackathon finalist teams (Team ByteForce & Team AI Nexus) to deliver 10-minute project showcases.',
+        step2Title: 'Shift Cultural Performance Forward by 20 Minutes',
+        step2Desc: 'Alert Music Society band lead to report to green room early for line checks.',
+        step3Title: 'Update Projected Agenda on Foyer Monitors',
+        step3Desc: 'IT lead Aman to push revised run-sheet to auditorium digital displays.',
+        broadcast: '📢 *SCHEDULE ADJUSTMENT: KEYNOTE GAP MITIGATION*\nFinalist lightning showcases moved up to 06:50 PM.\nBand members: Report to Green Room Stage Left immediately.'
+      },
+      power_outage: {
+        badge: 'CRITICAL INFRASTRUCTURE BREACH',
+        badgeClass: 'badge-red',
+        title: 'Campus Power Fluctuation / Substation Tripped',
+        step1Title: 'Verify Auto-Transfer to Campus Diesel Generator',
+        step1Desc: 'Confirm auditorium Stage 1 emergency circuit indicator shows green on panel 3.',
+        step2Title: 'Call Campus Chief Electrician Mr. Ramesh',
+        step2Desc: 'Dispatch security volunteer to Substation Room 2 with key clearance.',
+        step3Title: 'Ensure Stage Safety Illumination',
+        step3Desc: 'Instruct usher volunteers to turn on rechargeable emergency lanterns along auditorium aisles.',
+        broadcast: '⚡ *ALERT: DIESEL GENERATOR ENGAGED*\nRemain calm. Stage audio running on UPS backup.\nAisle leads: Illuminate rechargeable lanterns.'
+      },
+      gate_rush: {
+        badge: 'SAFETY & CROWD FLOW ALERT',
+        badgeClass: 'badge-blue',
+        title: 'Main Gate Overcrowding at Registration Desk A',
+        step1Title: 'Activate Secondary QR Fast-Track Desks',
+        step1Desc: 'Deploy 2 backup volunteer tablets at Table C to split attendee influx.',
+        step2Title: 'Erect Stanchion Rope Queue Dividers',
+        step2Desc: 'Suresh & Logistics team to guide single-file entrance lines.',
+        step3Title: 'Dispatch Security Guards to Courtyard Perimeter',
+        step3Desc: 'Instruct campus guards to clear vestibule bottleneck.',
+        broadcast: '👥 *CROWD CONTROL PROTOCOL ACTIVATED*\nVrunda & Amit: Open Terminal C immediately.\nLogistics: Deploy queue dividers to Entrance A.'
+      },
+      catering_delay: {
+        badge: 'LOGISTICS DELAY',
+        badgeClass: 'badge-purple',
+        title: 'Dinner Catering Delayed by 45 Minutes',
+        step1Title: 'Distribute Cold Bottled Beverages & Light Wafers First',
+        step1Desc: 'Hospitality team to distribute refreshment boxes in foyer to maintain comfort.',
+        step2Title: 'Extend Live Band Performance by 2 Encores',
+        step2Desc: 'Request music society to perform 2 extra acoustic numbers.',
+        step3Title: 'Ping Swad Caterers Vehicle ETA',
+        step3Desc: 'Confirm dispatch van arrival at Campus Loading Dock Gate 4.',
+        broadcast: '🍱 *REFRESHMENT UPDATE*\nHospitality team: Open Corridor B beverage counters.\nDinner timing shifted to 08:45 PM.'
+      },
+      rain_relocation: {
+        badge: 'WEATHER INCIDENT',
+        badgeClass: 'badge-cyan',
+        title: 'Heavy Rain — Outdoor Courtyard Relocation',
+        step1Title: 'Move Registration Desks Inside Main Foyer',
+        step1Desc: 'Relocate tables into East Wing Corridor under covered roof.',
+        step2Title: 'Deploy Slip-Resistant Rubber Entrance Mats',
+        step2Desc: 'Prevent slippery lobby flooring at entrance doors.',
+        step3Title: 'Direct Attendees to Covered Walkway Section B',
+        step3Desc: 'Post 2 volunteers with guidance arrows.',
+        broadcast: '🌧️ *RAIN PROTOCOL ACTIVE*\nAll outdoor booths moved inside Auditorium Foyer.\nVolunteers: Guide arriving attendees through Covered Way B.'
+      }
+    };
+
+    function triggerCrisis(key) {
+      const data = CRISIS_DATA[key];
+      if (!data) return;
+
+      ClubOps.aiLoader.show(['Assessing incident threat severity...', 'Synthesizing 3-step containment sequence...', 'Preparing speed-dial routing...']);
+      setTimeout(() => {
+        ClubOps.aiLoader.hide();
+
+        document.getElementById('crisisBadge').className = `badge ${data.badgeClass}`;
+        document.getElementById('crisisBadge').innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${data.badge}`;
+        document.getElementById('crisisTitle').textContent = data.title;
+        document.getElementById('step1Title').textContent = data.step1Title;
+        document.getElementById('step1Desc').textContent = data.step1Desc;
+        document.getElementById('step2Title').textContent = data.step2Title;
+        document.getElementById('step2Desc').textContent = data.step2Desc;
+        document.getElementById('step3Title').textContent = data.step3Title;
+        document.getElementById('step3Desc').textContent = data.step3Desc;
+        document.getElementById('broadcastText').textContent = data.broadcast;
+
+        ClubOps.toast(`SOS Protocol for "${data.title}" activated!`, 'success');
+      }, 700);
+    }
+
+    function analyzeCustomCrisis() {
+      const text = document.getElementById('customCrisisInput').value.trim();
+      if (!text) return ClubOps.toast('Please describe the emergency situation', 'warn');
+
+      ClubOps.aiLoader.show(['Analyzing emergency situation...', 'Consulting institutional incident patterns...', 'Generating custom containment steps...']);
+      setTimeout(() => {
+        ClubOps.aiLoader.hide();
+
+        document.getElementById('crisisBadge').className = 'badge badge-red';
+        document.getElementById('crisisBadge').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> CUSTOM INCIDENT DISPATCH';
+        document.getElementById('crisisTitle').textContent = `Incident: "${text}"`;
+        document.getElementById('step1Title').textContent = 'Immediate Containment & Safety Isolation';
+        document.getElementById('step1Desc').textContent = `Isolate affected zone, secure primary stage continuity, and prevent crowd confusion.`;
+        document.getElementById('step2Title').textContent = 'Deploy Designated Lead & Redundant Equipment';
+        document.getElementById('step2Desc').textContent = `Assign lead organizer to directly supervise backup swap and communicate status to command room.`;
+        document.getElementById('step3Title').textContent = 'Maintain Audience Engagement';
+        document.getElementById('step3Desc').textContent = `Keep program flow uninterrupted via emcee announcements and temporary lighting/sound alternatives.`;
+        document.getElementById('broadcastText').textContent = `🚨 *URGENT OPERATIONAL NOTICE*\nIssue: ${text}\nAll leads stand by for direct instructions on Walkie Ch. 1.`;
+
+        ClubOps.toast('Custom AI Incident Protocol synthesized!', 'success');
+      }, 900);
+    }
+
+    function copyProtocol() {
+      const title = document.getElementById('crisisTitle').textContent;
+      const s1 = document.getElementById('step1Title').textContent + ' — ' + document.getElementById('step1Desc').textContent;
+      const s2 = document.getElementById('step2Title').textContent + ' — ' + document.getElementById('step2Desc').textContent;
+      const s3 = document.getElementById('step3Title').textContent + ' — ' + document.getElementById('step3Desc').textContent;
+      const full = `*CLUBOPS AI INCIDENT PROTOCOL*\n${title}\n\n1. ${s1}\n2. ${s2}\n3. ${s3}`;
+      navigator.clipboard.writeText(full).then(() => ClubOps.toast('Incident action plan copied to clipboard!', 'success'));
+    }
+
+    function copyBroadcast() {
+      const txt = document.getElementById('broadcastText').textContent;
+      navigator.clipboard.writeText(txt).then(() => ClubOps.toast('Volunteer broadcast message copied!', 'success'));
+    }
+  </script>
+</body>
+</html>

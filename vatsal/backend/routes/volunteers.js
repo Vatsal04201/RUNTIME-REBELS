@@ -1,63 +1,118 @@
 const express = require('express');
 const router = express.Router();
-const { readData, writeData } = require('../dataStore');
+const { run, get, all } = require('../database/database');
 
-// GET /api/volunteers
-router.get('/', (req, res) => {
-  const volunteers = readData('volunteers');
-  const assigned = volunteers.filter(v => v.status === 'assigned' && v.name).length;
-  const unassigned = volunteers.length - assigned;
+// GET /api/volunteers - List volunteers
+router.get('/', async (req, res) => {
+  try {
+    const { eventId, team, status } = req.query;
+    let sql = 'SELECT * FROM volunteers WHERE 1=1';
+    const params = [];
 
-  res.json({
-    success: true,
-    total: volunteers.length,
-    assigned,
-    unassigned,
-    data: volunteers
-  });
+    if (eventId) {
+      sql += ' AND eventId = ?';
+      params.push(eventId);
+    }
+    if (team) {
+      sql += ' AND team = ?';
+      params.push(team);
+    }
+    if (status) {
+      sql += ' AND status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY team ASC, name ASC';
+    const volunteers = await all(sql, params);
+    res.json({ success: true, data: volunteers });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
-// POST /api/volunteers
-router.post('/', (req, res) => {
-  const volunteers = readData('volunteers');
-  const newVol = {
-    id: req.body.id || `vol-${Date.now()}`,
-    name: req.body.name || null,
-    role: req.body.role || 'Volunteer',
-    department: req.body.department || 'Operations',
-    status: req.body.status || (req.body.name ? 'assigned' : 'unassigned'),
-    eventId: req.body.eventId || 'felicific-2026'
-  };
+// POST /api/volunteers - Add volunteer
+router.post('/', async (req, res) => {
+  try {
+    const {
+      eventId = 'felicific-2026',
+      name,
+      role = 'Volunteer',
+      team = 'Registration',
+      contact = '+91 98765 00000',
+      tasks = 1,
+      status = 'Assigned'
+    } = req.body;
 
-  volunteers.push(newVol);
-  writeData('volunteers', volunteers);
-  res.status(201).json({ success: true, data: newVol });
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Volunteer name is required' });
+    }
+
+    const id = `v-${Date.now()}`;
+    await run(`
+      INSERT INTO volunteers (id, eventId, name, role, team, contact, tasks, status, checkedIn, checkInTime)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)
+    `, [id, eventId, name, role, team, contact, tasks, status]);
+
+    const created = await get('SELECT * FROM volunteers WHERE id = ?', [id]);
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
-// PUT /api/volunteers/:id (assign or update)
-router.put('/:id', (req, res) => {
-  const volunteers = readData('volunteers');
-  const index = volunteers.findIndex(v => v.id === req.params.id);
+// PUT /api/volunteers/:id - Update volunteer details or assign
+router.put('/:id', async (req, res) => {
+  try {
+    const { name, role, team, contact, status, tasks } = req.body;
+    const vol = await get('SELECT * FROM volunteers WHERE id = ?', [req.params.id]);
+    if (!vol) {
+      return res.status(404).json({ success: false, message: 'Volunteer not found' });
+    }
 
-  if (index === -1) {
-    return res.status(404).json({ success: false, message: 'Volunteer entry not found' });
+    await run(`
+      UPDATE volunteers
+      SET name = COALESCE(?, name),
+          role = COALESCE(?, role),
+          team = COALESCE(?, team),
+          contact = COALESCE(?, contact),
+          status = COALESCE(?, status),
+          tasks = COALESCE(?, tasks)
+      WHERE id = ?
+    `, [name, role, team, contact, status, tasks, req.params.id]);
+
+    const updated = await get('SELECT * FROM volunteers WHERE id = ?', [req.params.id]);
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
+});
 
-  const existing = volunteers[index];
-  const updated = {
-    ...existing,
-    ...req.body,
-    id: existing.id
-  };
+// POST /api/volunteers/:id/checkin - Event Day Check-in
+router.post('/:id/checkin', async (req, res) => {
+  try {
+    const vol = await get('SELECT * FROM volunteers WHERE id = ?', [req.params.id]);
+    if (!vol) {
+      return res.status(404).json({ success: false, message: 'Volunteer not found' });
+    }
 
-  // If assigned with a name, mark status as assigned
-  if (updated.name && updated.status === 'unassigned') {
-    updated.status = 'assigned';
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    await run(`
+      UPDATE volunteers
+      SET checkedIn = 1, checkInTime = ?
+      WHERE id = ?
+    `, [timeStr, req.params.id]);
+
+    await run(`
+      INSERT INTO activity (id, eventId, text, time, dot, timestamp)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [`act-${Date.now()}`, vol.eventId, `Volunteer <strong>${vol.name}</strong> checked in via QR scanner`, 'Just now', 'green', Date.now()]);
+
+    const updated = await get('SELECT * FROM volunteers WHERE id = ?', [req.params.id]);
+    res.json({ success: true, message: `Volunteer ${vol.name} successfully checked in!`, data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-
-  volunteers[index] = updated;
-  writeData('volunteers', volunteers);
-  res.json({ success: true, data: updated });
 });
 
 module.exports = router;

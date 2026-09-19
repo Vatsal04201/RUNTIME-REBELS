@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Create Event</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body data-page="events">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h1><i class="fa-solid fa-calendar-plus" style="color:var(--cyan);"></i> Create New Club Event <span class="badge-ai">AI Plan Ready</span></h1>
+          <p>Initialize a new college fest, hackathon, or symposium with automated operations.</p>
+        </div>
+        <div class="topbar-actions">
+          <a href="dashboard.html" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+        </div>
+      </header>
+
+      <div class="grid grid-2">
+        <!-- Event Form -->
+        <div class="card card-glow">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-pen-to-square"></i> Event Parameters</div>
+            <span class="card-sub">Step 1 of 2</span>
+          </div>
+
+          <form id="createEventForm" onsubmit="event.preventDefault(); handleCreateEvent();">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="eventName">Event Name <span class="req">*</span></label>
+                <input type="text" id="eventName" required placeholder="e.g. Felicific 2026, CodeSprint 2026" value="HackTech 2026">
+              </div>
+
+              <div class="field">
+                <label for="eventType">Category / Type</label>
+                <select id="eventType">
+                  <option value="Cultural Festival">Cultural Festival</option>
+                  <option value="Technical Symposium" selected>Technical Symposium</option>
+                  <option value="Hackathon">24h Hackathon</option>
+                  <option value="Sports Meet">Sports Meet</option>
+                  <option value="Workshop / Seminar">Workshop / Seminar</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="eventDate">Event Date <span class="req">*</span></label>
+                <input type="date" id="eventDate" required value="2026-10-15">
+              </div>
+
+              <div class="field">
+                <label for="startTime">Start Time</label>
+                <input type="time" id="startTime" value="09:00">
+              </div>
+
+              <div class="field">
+                <label for="endTime">End Time</label>
+                <input type="time" id="endTime" value="18:00">
+              </div>
+
+              <div class="field">
+                <label for="eventVenue">Campus Venue</label>
+                <input type="text" id="eventVenue" placeholder="e.g. Auditorium, IT Lab 3" value="Main IT Seminar Hall">
+              </div>
+
+              <div class="field">
+                <label for="expectedGuests">Expected Guests / Delegates</label>
+                <input type="number" id="expectedGuests" value="120">
+              </div>
+
+              <div class="field">
+                <label for="volunteersCount">Volunteers Required</label>
+                <input type="number" id="volunteersCount" value="18">
+              </div>
+
+              <div class="field">
+                <label for="eventBudget">Sanctioned Budget (₹)</label>
+                <input type="number" id="eventBudget" value="45000">
+              </div>
+
+              <div class="field full">
+                <label for="eventDesc">Event Description</label>
+                <textarea id="eventDesc" rows="3" placeholder="Brief outline of the event...">Annual inter-college coding sprint with technical relays, keynote on generative agents, and awards.</textarea>
+              </div>
+
+              <div class="field full">
+                <label for="eventReq">Special Operational Requirements</label>
+                <textarea id="eventReq" rows="2" placeholder="Special requirements (e.g. high-speed Wi-Fi, audio PA, certificates)...">High-speed Wi-Fi routers, 4x extension boards per table, 2 wireless mics, 120 participant kits.</textarea>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+              <button type="reset" class="btn btn-ghost">Reset</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmit">
+                <i class="fa-solid fa-sparkles"></i> Create & Generate AI Plan
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- AI Real-time Preview Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-brain"></i> Autonomous Operations Engine</div>
+            <span class="badge badge-cyan">Proactive AI</span>
+          </div>
+
+          <div style="padding: 10px 0; color: var(--text-1); font-size: 13.5px; line-height: 1.6;">
+            When you create this event, <strong>ClubOps AI</strong> will automatically:
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; margin: 16px 0;">
+            <div class="metric">
+              <div class="metric-label"><i class="fa-solid fa-list-check"></i> 1. 3-Phase Work Breakdown</div>
+              <div style="font-size: 13px; color: var(--text-1);">Generates essential tasks across Before Event, Event Day, and Wrap-Up.</div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label"><i class="fa-solid fa-file-shield"></i> 2. Administrative Compliance</div>
+              <div style="font-size: 13px; color: var(--text-1);">Drafts formal Dean permission letter with safety & noise regulations pre-filled.</div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label"><i class="fa-solid fa-users"></i> 3. Team Deployments</div>
+              <div style="font-size: 13px; color: var(--text-1);">Allocates recommended volunteer ratios across Registration, Tech, and Hospitality.</div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-label"><i class="fa-solid fa-shield-virus"></i> 4. Risk Radar Initialization</div>
+              <div style="font-size: 13px; color: var(--text-1);">Establishes countdown checkpoints for vendor confirmation and power backup.</div>
+            </div>
+          </div>
+
+          <div id="aiPlanPreview" style="display: none; background: rgba(34, 211, 238, 0.06); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 12px; padding: 16px; margin-top: 14px;">
+            <div style="font-weight: 700; color: var(--cyan); margin-bottom: 8px;"><i class="fa-solid fa-circle-check"></i> Plan Synthesized</div>
+            <div id="aiPlanText" style="font-size: 12.5px; color: var(--text-1); line-height: 1.6;"></div>
+            <a href="event-planner.html" class="btn btn-primary btn-sm" style="margin-top: 12px;">Open Full Event Planner <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    async function handleCreateEvent() {
+      const name = document.getElementById('eventName').value.trim();
+      const type = document.getElementById('eventType').value;
+      const date = document.getElementById('eventDate').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const venue = document.getElementById('eventVenue').value;
+      const guests = +document.getElementById('expectedGuests').value;
+      const volunteers = +document.getElementById('volunteersCount').value;
+      const budget = +document.getElementById('eventBudget').value;
+      const description = document.getElementById('eventDesc').value;
+      const requirements = document.getElementById('eventReq').value;
+
+      ClubOps.aiLoader.show([
+        'Registering event parameters in SQLite...',
+        'Synthesizing 3-phase master execution plan...',
+        'Structuring initial volunteer zones...',
+        'Event ready!'
+      ]);
+
+      try {
+        const res = await ClubOps.api.post('/api/events', {
+          name, type, date, startTime, endTime, venue, guests, volunteers, budget, description, requirements, status: 'Planning'
+        });
+
+        // Also fetch AI starter plan
+        const planRes = await ClubOps.api.post('/api/ai/generate-plan', { eventName: name, type });
+
+        ClubOps.aiLoader.hide();
+        ClubOps.toast(`Event "${name}" successfully initialized!`, 'success');
+
+        const preview = document.getElementById('aiPlanPreview');
+        const planText = document.getElementById('aiPlanText');
+        if (preview && planText && planRes.plan) {
+          preview.style.display = 'block';
+          planText.innerHTML = `Created <strong>${planRes.plan.phases.length} operational phases</strong> with ${planRes.plan.phases.reduce((acc, p) => acc + p.tasks.length, 0)} starter tasks.`;
+        }
+
+      } catch (err) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Error creating event: ' + err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

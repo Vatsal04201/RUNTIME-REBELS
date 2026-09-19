@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Event Planner</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .phase-column {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .phase-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .task-card {
+      background: rgba(10, 14, 26, 0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .task-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .task-card.done {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      color: var(--text-2);
+    }
+  </style>
+</head>
+<body data-page="planner">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h1><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--cyan);"></i> AI 3-Phase Event Planner <span class="badge-ai">Autonomous</span></h1>
+          <p>Structured operational breakdown for <strong id="plannerEventName">Felicific 2026</strong>. Add, edit, or check off tasks.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" onclick="generateAiPlan()"><i class="fa-solid fa-rotate"></i> Regenerate with AI</button>
+          <button class="btn btn-primary" onclick="openAddTaskModal()"><i class="fa-solid fa-plus"></i> Add Task</button>
+        </div>
+      </header>
+
+      <!-- 3 Columns for Phases -->
+      <div class="grid grid-3">
+        <!-- Phase 1: Before Event -->
+        <div class="phase-column">
+          <div class="phase-head">
+            <div>
+              <h3 style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clipboard-check" style="color:var(--cyan);"></i> 1. Before Event</h3>
+              <span class="card-sub">Approvals, bookings & preparation</span>
+            </div>
+            <span class="badge badge-cyan" id="badgeBeforeCount">0 tasks</span>
+          </div>
+          <div id="colBeforeTasks" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <!-- Phase 2: Event Day -->
+        <div class="phase-column">
+          <div class="phase-head">
+            <div>
+              <h3 style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-satellite-dish" style="color:var(--amber);"></i> 2. Event Day</h3>
+              <span class="card-sub">Live coordination & stage execution</span>
+            </div>
+            <span class="badge badge-amber" id="badgeDayCount">0 tasks</span>
+          </div>
+          <div id="colDayTasks" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <!-- Phase 3: After Event -->
+        <div class="phase-column">
+          <div class="phase-head">
+            <div>
+              <h3 style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-flag-checkered" style="color:var(--green);"></i> 3. After Event</h3>
+              <span class="card-sub">Feedback, clean-up & vendor settlement</span>
+            </div>
+            <span class="badge badge-green" id="badgeAfterCount">0 tasks</span>
+          </div>
+          <div id="colAfterTasks" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    let allTasks = [];
+
+    async function loadPlannerTasks() {
+      try {
+        const res = await ClubOps.api.get('/api/tasks?eventId=felicific-2026');
+        allTasks = res.data || [];
+        renderPhases();
+      } catch (e) {
+        console.error(e);
+        ClubOps.toast('Error loading tasks from database', 'error');
+      }
+    }
+
+    function renderPhases() {
+      const before = allTasks.filter(t => t.phase === 'Before Event');
+      const day = allTasks.filter(t => t.phase === 'Event Day');
+      const after = allTasks.filter(t => t.phase === 'After Event');
+
+      document.getElementById('badgeBeforeCount').textContent = `${before.length} tasks`;
+      document.getElementById('badgeDayCount').textContent = `${day.length} tasks`;
+      document.getElementById('badgeAfterCount').textContent = `${after.length} tasks`;
+
+      renderTaskColumn('colBeforeTasks', before);
+      renderTaskColumn('colDayTasks', day);
+      renderTaskColumn('colAfterTasks', after);
+    }
+
+    function renderTaskColumn(containerId, tasks) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (tasks.length === 0) {
+        container.innerHTML = `<div style="color:var(--text-3); font-size:12px; padding:16px; text-align:center;">No tasks in this phase yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = tasks.map(t => {
+        const isDone = t.status.toLowerCase() === 'completed';
+        const priorityColor = t.priority === 'High' ? 'badge-red' : (t.priority === 'Medium' ? 'badge-amber' : 'badge-cyan');
+
+        return `
+          <div class="task-card ${isDone ? 'done' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+              <strong style="font-size:13px; color:var(--text-0);">${ClubOps.escapeHtml(t.title)}</strong>
+              <button onclick="toggleTask('${t.id}', '${isDone ? 'Pending' : 'Completed'}')" style="color:${isDone ? 'var(--green)' : 'var(--text-3)'}; font-size:16px;">
+                <i class="fa-${isDone ? 'solid fa-circle-check' : 'regular fa-circle'}"></i>
+              </button>
+            </div>
+            <div class="task-meta">
+              <span><i class="fa-solid fa-user"></i> ${ClubOps.escapeHtml(t.owner)}</span>
+              <span><i class="fa-solid fa-clock"></i> ${ClubOps.escapeHtml(t.deadline)}</span>
+              <span class="badge ${priorityColor}">${ClubOps.escapeHtml(t.priority)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleTask(id, nextStatus) {
+      try {
+        await ClubOps.api.put(`/api/tasks/${id}`, { status: nextStatus });
+        ClubOps.toast(`Task marked ${nextStatus}!`, 'success');
+        loadPlannerTasks();
+      } catch (e) {
+        ClubOps.toast('Failed to update task', 'error');
+      }
+    }
+
+    function openAddTaskModal() {
+      const body = `
+        <div class="form-grid">
+          <div class="field full">
+            <label>Task Title</label>
+            <input type="text" id="modalTaskTitle" placeholder="e.g. Inspect fire extinguishers" required>
+          </div>
+          <div class="field">
+            <label>Assigned Lead</label>
+            <input type="text" id="modalTaskOwner" value="Rahul Sharma">
+          </div>
+          <div class="field">
+            <label>Operational Phase</label>
+            <select id="modalTaskPhase">
+              <option value="Before Event">1. Before Event</option>
+              <option value="Event Day">2. Event Day</option>
+              <option value="After Event">3. After Event</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Priority</label>
+            <select id="modalTaskPriority">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Deadline</label>
+            <input type="text" id="modalTaskDeadline" value="Tomorrow">
+          </div>
+        </div>
+      `;
+
+      ClubOps.modal.open({
+        title: 'Add New Operational Task',
+        body,
+        actions: [
+          { label: 'Cancel', className: 'btn-ghost', onClick: () => ClubOps.modal.close() },
+          {
+            label: 'Save Task',
+            className: 'btn-primary',
+            icon: 'fa-check',
+            onClick: async () => {
+              const title = document.getElementById('modalTaskTitle').value;
+              const owner = document.getElementById('modalTaskOwner').value;
+              const phase = document.getElementById('modalTaskPhase').value;
+              const priority = document.getElementById('modalTaskPriority').value;
+              const deadline = document.getElementById('modalTaskDeadline').value;
+
+              if (!title) return;
+              await ClubOps.api.post('/api/tasks', {
+                eventId: 'felicific-2026', title, owner, phase, priority, deadline, status: 'Pending'
+              });
+              ClubOps.toast('Task created successfully!', 'success');
+              loadPlannerTasks();
+            }
+          }
+        ]
+      });
+    }
+
+    async function generateAiPlan() {
+      ClubOps.aiLoader.show([
+        'Analyzing Felicific 2026 requirements...',
+        'Cross-referencing past year club memory...',
+        'Structuring 3-phase timeline...',
+        'Applying to database...'
+      ]);
+
+      try {
+        const res = await ClubOps.api.post('/api/ai/generate-plan', { eventName: 'Felicific 2026', type: 'Cultural & Tech' });
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('AI generated master plan!', 'success');
+        loadPlannerTasks();
+      } catch (e) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Error generating plan', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPlannerTasks);
+  </script>
+</body>
+</html>

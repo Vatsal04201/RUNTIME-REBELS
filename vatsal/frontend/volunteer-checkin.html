@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Volunteer QR Check-In</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .qr-box {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      border: 2px dashed var(--cyan);
+      border-radius: var(--radius-lg);
+      display: grid;
+      place-items: center;
+      background: rgba(34, 211, 238, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .qr-scanner-line {
+      position: absolute;
+      left: 0; right: 0; height: 2px;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+      animation: scan 2s linear infinite;
+    }
+    @keyframes scan {
+      0% { top: 10%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { top: 90%; opacity: 0; }
+    }
+  </style>
+</head>
+<body data-page="checkin">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h1><i class="fa-solid fa-qrcode" style="color:var(--cyan);"></i> Event Day Volunteer QR Check-In Console</h1>
+          <p>Scan volunteer QR badge or tap their name to record verified on-site check-in timestamp.</p>
+        </div>
+        <div class="topbar-actions">
+          <a href="volunteers.html" class="btn btn-ghost"><i class="fa-solid fa-users"></i> Back to Roster</a>
+        </div>
+      </header>
+
+      <div class="grid grid-2">
+        <!-- QR Check-in Terminal -->
+        <div class="card card-glow" style="text-align: center;">
+          <div class="card-header" style="justify-content:center;">
+            <div class="card-title"><i class="fa-solid fa-camera"></i> Live Gate Check-In Terminal</div>
+          </div>
+
+          <div class="qr-box">
+            <div class="qr-scanner-line"></div>
+            <i class="fa-solid fa-qrcode" style="font-size: 80px; color: var(--text-2);"></i>
+          </div>
+
+          <h3 style="margin-bottom: 6px;">Scan Badge or Select Name</h3>
+          <p style="color: var(--text-2); font-size: 13px; max-width: 320px; margin: 0 auto 20px;">
+            Point scanner at student ID lanyard or select volunteer from the queue below to trigger instant verified check-in.
+          </p>
+
+          <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="btn btn-primary" onclick="simulateFastCheckIn()"><i class="fa-solid fa-bolt"></i> One-Tap Check In Next Lead</button>
+          </div>
+        </div>
+
+        <!-- Attendance Stats & Live Check-in Feed -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-clipboard-user"></i> On-Site Attendance Status</div>
+            <span class="badge badge-green" id="attendanceRatioBadge">18/20 Arrived</span>
+          </div>
+
+          <div class="metric" style="margin-bottom: 16px;">
+            <div class="metric-label">Live Volunteer Turnout</div>
+            <div class="metric-value" id="turnoutPct">90%</div>
+            <div class="metric-delta up" id="turnoutStatusText">2 volunteers pending arrival</div>
+          </div>
+
+          <h4 style="font-size: 13px; color: var(--text-2); margin-bottom: 10px; text-transform: uppercase;">Awaiting Check-In:</h4>
+          <div id="pendingList" style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Rendered from pending volunteers -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    let pendingVols = [];
+
+    async function loadCheckinState() {
+      try {
+        const res = await ClubOps.api.get('/api/volunteers?eventId=felicific-2026');
+        const list = res.data || [];
+        const arrived = list.filter(v => v.checkedIn === 1);
+        pendingVols = list.filter(v => v.checkedIn !== 1);
+
+        document.getElementById('attendanceRatioBadge').textContent = `${arrived.length}/${list.length} Arrived`;
+        const pct = Math.round((arrived.length / (list.length || 1)) * 100);
+        document.getElementById('turnoutPct').textContent = `${pct}%`;
+
+        if (pendingVols.length === 0) {
+          document.getElementById('turnoutStatusText').textContent = '20/20 Arrived! All Leads On Duty ✅';
+          document.getElementById('turnoutStatusText').style.color = 'var(--green)';
+        } else {
+          document.getElementById('turnoutStatusText').textContent = `${pendingVols.length} volunteer(s) pending arrival`;
+        }
+
+        const container = document.getElementById('pendingList');
+        if (pendingVols.length === 0) {
+          container.innerHTML = `<div style="color:var(--green); font-size:13px; padding:12px; text-align:center;"><i class="fa-solid fa-circle-check"></i> All team leads checked in!</div>`;
+          return;
+        }
+
+        container.innerHTML = pendingVols.map(v => `
+          <div style="background:rgba(10,14,26,0.7); border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:var(--text-0); font-size:13px;">${ClubOps.escapeHtml(v.name)}</strong>
+              <div style="color:var(--text-2); font-size:11.5px;">${ClubOps.escapeHtml(v.team)} • ${ClubOps.escapeHtml(v.role)}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="checkInId('${v.id}', '${v.name}')">
+              <i class="fa-solid fa-check"></i> Check In
+            </button>
+          </div>
+        `).join('');
+      } catch (e) {
+        ClubOps.toast('Error loading checkin state', 'error');
+      }
+    }
+
+    async function checkInId(id, name) {
+      try {
+        await ClubOps.api.post(`/api/volunteers/${id}/checkin`);
+        ClubOps.toast(`${name} checked in successfully!`, 'success');
+        loadCheckinState();
+      } catch (e) {
+        ClubOps.toast('Check in failed', 'error');
+      }
+    }
+
+    async function simulateFastCheckIn() {
+      if (pendingVols.length === 0) {
+        ClubOps.toast('All volunteers are already checked in!', 'info');
+        return;
+      }
+      const first = pendingVols[0];
+      await checkInId(first.id, first.name);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCheckinState);
+  </script>
+</body>
+</html>

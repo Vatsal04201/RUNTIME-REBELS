@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Club Institutional Memory</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .ai-query-card {
+      background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.15), transparent 70%),
+                  linear-gradient(135deg, rgba(20, 26, 46, 0.9), rgba(10, 14, 26, 0.95));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .query-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-1);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .query-pill:hover {
+      border-color: var(--purple);
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--text-0);
+      transform: translateY(-1px);
+    }
+    .ai-answer-card {
+      background: rgba(168, 85, 247, 0.08);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+    .memory-doc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .memory-doc-card:hover {
+      border-color: var(--cyan);
+      background: rgba(20, 26, 46, 0.85);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body data-page="memory">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h1><i class="fa-solid fa-brain" style="color:var(--purple);"></i> Club Institutional Memory <span class="badge-ai">Knowledge Base</span></h1>
+          <p>Search past event budgets, vendor contracts, dean permission guidelines, and retrospective reports across club batches.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openAddMemoryModal()"><i class="fa-solid fa-plus"></i> Store New Memory Record</button>
+        </div>
+      </header>
+
+      <!-- AI Conversational Search Box -->
+      <div class="ai-query-card card-glow">
+        <div style="font-size:12px; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI Semantic Memory Query
+        </div>
+        <div style="display:flex; gap:12px;">
+          <input type="text" class="input" id="memorySearchInput" placeholder="Ask Club Memory: e.g. Which sound vendor did we use last year and what was the cost?" style="flex:1; font-size:14.5px;">
+          <button class="btn btn-primary" onclick="queryMemory()"><i class="fa-solid fa-magnifying-glass"></i> Search Memory</button>
+        </div>
+
+        <!-- Sample Query Suggestions -->
+        <div style="margin-top:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:var(--text-2);">Try asking:</span>
+          <span class="query-pill" onclick="quickQuery('Which sound vendor did we use for Felicific 2025?')"><i class="fa-solid fa-microphone"></i> Sound vendor 2025</span>
+          <span class="query-pill" onclick="quickQuery('How much did we spend on stage decoration?')"><i class="fa-solid fa-indian-rupee-sign"></i> Decor budget</span>
+          <span class="query-pill" onclick="quickQuery('What are the Dean permission letter requirements?')"><i class="fa-solid fa-file-signature"></i> Dean permissions</span>
+          <span class="query-pill" onclick="quickQuery('How many coders attended CodeSprint 2025?')"><i class="fa-solid fa-laptop-code"></i> CodeSprint attendance</span>
+        </div>
+
+        <!-- AI Synthesized Answer Box -->
+        <div class="ai-answer-card" id="aiAnswerBox" style="display:none;">
+          <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:var(--purple); margin-bottom:6px;">
+            <i class="fa-solid fa-brain"></i> AI Knowledge Synthesis:
+          </div>
+          <p style="font-size:13.5px; color:var(--text-0); line-height:1.6; margin:0;" id="aiAnswerText">
+            Loading past records...
+          </p>
+        </div>
+      </div>
+
+      <!-- Filters Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;" id="categoryFilters">
+          <button class="btn btn-primary btn-sm" onclick="filterDocs('all', this)">All Documents</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterDocs('Vendor', this)">Vendors</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterDocs('Budget', this)">Budgets</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterDocs('Permission', this)">Permissions</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterDocs('Report', this)">Retrospectives</button>
+        </div>
+        <div style="font-size:12.5px; color:var(--text-2);" id="memoryCount">
+          Showing 5 archived records
+        </div>
+      </div>
+
+      <!-- Past Documents Grid -->
+      <div class="grid grid-3" id="memoryGrid">
+        <!-- Records populated by JS -->
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    let allMemories = [];
+    let currentFilter = 'all';
+
+    async function loadMemories() {
+      try {
+        const res = await ClubOps.api.get('/api/memory');
+        if (res.success && res.data) {
+          allMemories = res.data;
+          renderGrid(allMemories);
+        }
+      } catch (err) {
+        ClubOps.toast('Error fetching club memory records', 'error');
+      }
+    }
+
+    function renderGrid(docs) {
+      const grid = document.getElementById('memoryGrid');
+      if (!docs.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-2);">No matching memory records found.</div>';
+        document.getElementById('memoryCount').textContent = 'Showing 0 records';
+        return;
+      }
+
+      document.getElementById('memoryCount').textContent = `Showing ${docs.length} archived records`;
+
+      grid.innerHTML = docs.map(d => `
+        <div class="memory-doc-card">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <span class="badge badge-purple">${ClubOps.escapeHtml(d.category)}</span>
+              <span style="font-size:12px; color:var(--cyan); font-weight:700;">${ClubOps.escapeHtml(d.eventName)} (${d.year})</span>
+            </div>
+            <h3 style="font-size:16px; color:var(--text-0); margin-bottom:8px; line-height:1.4;">${ClubOps.escapeHtml(d.title)}</h3>
+            <p style="font-size:12.5px; color:var(--text-1); line-height:1.6; margin-bottom:14px;">
+              ${ClubOps.escapeHtml(d.content)}
+            </p>
+          </div>
+          <div>
+            ${d.cost ? `<div style="font-size:14px; font-weight:700; color:var(--green); margin-bottom:8px;">Contract Value: ${ClubOps.formatCurrency(d.cost)}</div>` : ''}
+            <div style="font-size:11px; color:var(--text-2);">
+              <i class="fa-solid fa-tags"></i> Tags: ${ClubOps.escapeHtml(d.tags || 'General')}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterDocs(cat, btn) {
+      currentFilter = cat;
+      document.querySelectorAll('#categoryFilters .btn').forEach(b => {
+        b.className = 'btn btn-ghost btn-sm';
+      });
+      btn.className = 'btn btn-primary btn-sm';
+
+      if (cat === 'all') {
+        renderGrid(allMemories);
+      } else {
+        renderGrid(allMemories.filter(m => m.category.toLowerCase() === cat.toLowerCase()));
+      }
+    }
+
+    function quickQuery(text) {
+      document.getElementById('memorySearchInput').value = text;
+      queryMemory();
+    }
+
+    async function queryMemory() {
+      const q = document.getElementById('memorySearchInput').value.trim();
+      if (!q) return ClubOps.toast('Please enter a query', 'warn');
+
+      ClubOps.aiLoader.show(['Searching institutional knowledge vectors...', 'Cross-referencing 2024–2025 event archives...', 'Synthesizing natural language response...']);
+
+      try {
+        const res = await ClubOps.api.post('/api/memory/search', { query: q });
+        ClubOps.aiLoader.hide();
+
+        if (res.success) {
+          const box = document.getElementById('aiAnswerBox');
+          box.style.display = 'block';
+          document.getElementById('aiAnswerText').textContent = res.answer;
+
+          if (res.results && res.results.length) {
+            renderGrid(res.results);
+          }
+          ClubOps.toast('Memory query resolved!', 'success');
+        }
+      } catch (err) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Search query failed', 'error');
+      }
+    }
+
+    function openAddMemoryModal() {
+      ClubOps.modal.open({
+        title: 'Store New Institutional Knowledge Record',
+        body: `
+          <div class="form-grid">
+            <div class="field">
+              <label class="label">Event Name</label>
+              <input type="text" class="input" id="memEvent" value="Felicific 2025">
+            </div>
+            <div class="field">
+              <label class="label">Event Year</label>
+              <input type="text" class="input" id="memYear" value="2025">
+            </div>
+            <div class="field">
+              <label class="label">Category</label>
+              <select class="select" id="memCat">
+                <option value="Vendor">Vendor Contract</option>
+                <option value="Budget">Budget & Expenses</option>
+                <option value="Permission">Administrative Permission</option>
+                <option value="Report">Retrospective Report</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="label">Cost / Budget (₹)</label>
+              <input type="number" class="input" id="memCost" placeholder="e.g. 15000">
+            </div>
+            <div class="field full">
+              <label class="label">Record Title</label>
+              <input type="text" class="input" id="memTitle" placeholder="e.g. Stage 1 LED Backdrop Contract & Dimensions">
+            </div>
+            <div class="field full">
+              <label class="label">Knowledge Content & Operational Takeaways</label>
+              <textarea class="textarea" id="memContent" placeholder="Document vendor phone number, agreed terms, issues faced, and recommendations for next year..."></textarea>
+            </div>
+            <div class="field full">
+              <label class="label">Tags (comma-separated)</label>
+              <input type="text" class="input" id="memTags" placeholder="e.g. sound, audio, auditorium, vendor">
+            </div>
+          </div>
+        `,
+        actions: [
+          { label: 'Cancel', className: 'btn-ghost' },
+          {
+            label: 'Save into Memory',
+            className: 'btn-primary',
+            icon: 'fa-brain',
+            onClick: async () => {
+              const title = document.getElementById('memTitle').value;
+              const content = document.getElementById('memContent').value;
+              if (!title || !content) return ClubOps.toast('Please provide a title and content', 'warn');
+
+              try {
+                await ClubOps.api.post('/api/memory', {
+                  eventName: document.getElementById('memEvent').value,
+                  year: document.getElementById('memYear').value,
+                  category: document.getElementById('memCat').value,
+                  cost: document.getElementById('memCost').value || 0,
+                  title,
+                  content,
+                  tags: document.getElementById('memTags').value
+                });
+                ClubOps.toast('Memory record persisted to SQLite!', 'success');
+                loadMemories();
+              } catch (e) {
+                ClubOps.toast('Failed to save memory', 'error');
+              }
+            }
+          }
+        ]
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMemories);
+  </script>
+</body>
+</html>

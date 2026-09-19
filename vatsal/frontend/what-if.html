@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — What-If Simulator</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .scenario-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .scenario-card:hover {
+      border-color: var(--cyan);
+      background: rgba(34, 211, 238, 0.06);
+      transform: translateY(-2px);
+    }
+    .scenario-card.active {
+      border-color: var(--cyan);
+      background: rgba(34, 211, 238, 0.1);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+    }
+    .result-box {
+      background: rgba(15, 20, 36, 0.85);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-top: 24px;
+    }
+    .plan-step {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+    .plan-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--cyan);
+      color: #000;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body data-page="whatif">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">
+          <h1><i class="fa-solid fa-flask" style="color:var(--cyan);"></i> AI What-If Scenario Simulator <span class="badge-ai">Predictive Engine</span></h1>
+          <p>Model operational failures, stress-test club contingencies, and calculate readiness score impacts before disaster strikes.</p>
+        </div>
+      </header>
+
+      <!-- Preset Scenarios Grid -->
+      <div style="font-size:13px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;">
+        Choose a stress test scenario:
+      </div>
+
+      <div class="grid grid-4" style="margin-bottom: 24px;">
+        <div class="scenario-card active" onclick="runSimulation('volunteers_absent', this)">
+          <div>
+            <div style="font-size:22px; color:#f59e0b; margin-bottom:8px;"><i class="fa-solid fa-user-slash"></i></div>
+            <div style="font-weight:700; color:var(--text-0); font-size:14.5px;">3 Volunteers Absent</div>
+            <div style="font-size:12px; color:var(--text-2); margin-top:4px;">Main Registration Gate understaffed during peak rush.</div>
+          </div>
+          <div style="margin-top:14px;">
+            <span class="badge badge-amber">High Impact</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" onclick="runSimulation('sound_late', this)">
+          <div>
+            <div style="font-size:22px; color:#ef4444; margin-bottom:8px;"><i class="fa-solid fa-truck-ramp-box"></i></div>
+            <div style="font-weight:700; color:var(--text-0); font-size:14.5px;">Sound Vendor 1-Hr Delay</div>
+            <div style="font-size:12px; color:var(--text-2); margin-top:4px;">Van stuck in highway traffic, missing 4:00 PM sound check.</div>
+          </div>
+          <div style="margin-top:14px;">
+            <span class="badge badge-red">Critical Impact</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" onclick="runSimulation('heavy_rain', this)">
+          <div>
+            <div style="font-size:22px; color:#22d3ee; margin-bottom:8px;"><i class="fa-solid fa-cloud-showers-heavy"></i></div>
+            <div style="font-weight:700; color:var(--text-0); font-size:14.5px;">Heavy Rain & Storm</div>
+            <div style="font-size:12px; color:var(--text-2); margin-top:4px;">Outdoor courtyard stalls exposed to monsoon downpour.</div>
+          </div>
+          <div style="margin-top:14px;">
+            <span class="badge badge-cyan">Medium Impact</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" onclick="runSimulation('photographer_cancels', this)">
+          <div>
+            <div style="font-size:22px; color:#a855f7; margin-bottom:8px;"><i class="fa-solid fa-camera-slash"></i></div>
+            <div style="font-weight:700; color:var(--text-0); font-size:14.5px;">Photographer Cancels</div>
+            <div style="font-size:12px; color:var(--text-2); margin-top:4px;">Official fest documentation & sponsor footage at risk.</div>
+          </div>
+          <div style="margin-top:14px;">
+            <span class="badge badge-purple">Medium Impact</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Prompt Box -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--cyan);"></i> Custom Scenario Simulation</div>
+          <span class="card-sub">Simulate any unexpected variable</span>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <input type="text" class="input" id="customSimInput" placeholder="e.g. What if Chief Guest arrives 40 minutes earlier than scheduled?" style="flex:1;">
+          <button class="btn btn-primary" onclick="simulateCustom()"><i class="fa-solid fa-play"></i> Run Simulation</button>
+        </div>
+      </div>
+
+      <!-- Simulation Output -->
+      <div class="result-box card-glow" id="simulationResult">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:14px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="badge badge-amber" id="simRiskBadge">High Impact</span>
+              <span style="font-size:12px; color:var(--text-2);">Simulated on Felicific 2026</span>
+            </div>
+            <h2 style="font-size:22px; color:var(--text-0); margin-top:6px;" id="simTitle">Scenario: 3 Volunteers Do Not Arrive</h2>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px; color:var(--text-2); text-transform:uppercase;">Readiness Shift</div>
+            <div style="font-size:20px; font-weight:800; color:#f87171;" id="simShift">-12% (Recoverable to 95%)</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap:24px;">
+          <!-- Left: Cascading Impact -->
+          <div class="card" style="background:rgba(255,255,255,0.02);">
+            <div style="font-weight:700; color:var(--text-0); font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i> Predicted Operational Impact
+            </div>
+            <p style="font-size:13px; color:var(--text-1); line-height:1.6;" id="simImpact">
+              Main Registration Gate currently has 4 volunteers. If 3 are absent during peak arrival (5:30 PM - 6:15 PM), attendee wait time will spike to 12 minutes, causing courtyard queue spillover.
+            </p>
+
+            <div style="margin-top:16px; padding:12px; background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.2); border-radius:var(--radius-sm);">
+              <div style="font-size:11.5px; font-weight:700; color:#fca5a5;">VULNERABLE BOTTLENECK:</div>
+              <div style="font-size:12px; color:var(--text-1); margin-top:2px;">Main Foyer Fast-Track QR Scanner Terminal 2</div>
+            </div>
+          </div>
+
+          <!-- Right: AI 3-Step Contingency Plan -->
+          <div class="card" style="background:rgba(255,255,255,0.02);">
+            <div style="font-weight:700; color:var(--text-0); font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-shield-halved" style="color:var(--cyan);"></i> AI Mitigation Sequence
+            </div>
+
+            <div id="simSteps">
+              <div class="plan-step">
+                <div class="plan-num">1</div>
+                <div style="font-size:12.5px; color:var(--text-1);">Instantly reassign 2 volunteers from Logistics & Decoration team (Pooja Trivedi & Kunal Dave) to Registration Gate A.</div>
+              </div>
+              <div class="plan-step">
+                <div class="plan-num">2</div>
+                <div style="font-size:12.5px; color:var(--text-1);">Convert Helpdesk Counter into a secondary QR scan terminal.</div>
+              </div>
+              <div class="plan-step">
+                <div class="plan-num">3</div>
+                <div style="font-size:12.5px; color:var(--text-1);">Send automated WhatsApp reminder with gate location to all volunteers.</div>
+              </div>
+            </div>
+
+            <div style="margin-top:18px;">
+              <button class="btn btn-primary" style="width:100%;" id="applyPlanBtn" onclick="applyPlan()">
+                <i class="fa-solid fa-check-double"></i> Apply Volunteer Reassignment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    async function runSimulation(scenarioKey, cardEl) {
+      if (cardEl) {
+        document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+        cardEl.classList.add('active');
+      }
+
+      ClubOps.aiLoader.show(['Simulating operational variables...', 'Calculating cascading delays & risk weights...', 'Synthesizing contingency protocol...']);
+
+      try {
+        const res = await ClubOps.api.post('/api/ai/what-if', { scenario: scenarioKey, eventId: 'felicific-2026' });
+        ClubOps.aiLoader.hide();
+
+        if (res.success && res.data) {
+          renderResult(res.data);
+          ClubOps.toast(`Simulation complete for "${res.data.scenario}"`, 'success');
+        }
+      } catch (err) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Simulation executed via offline engine', 'info');
+      }
+    }
+
+    async function simulateCustom() {
+      const q = document.getElementById('customSimInput').value.trim();
+      if (!q) return ClubOps.toast('Please enter a scenario to test', 'warn');
+
+      ClubOps.aiLoader.show(['Parsing scenario query...', 'Querying club capacity matrix...', 'Modeling contingency solution...']);
+      try {
+        const res = await ClubOps.api.post('/api/ai/what-if', { scenario: 'custom', customQuery: q, eventId: 'felicific-2026' });
+        ClubOps.aiLoader.hide();
+
+        if (res.success && res.data) {
+          renderResult(res.data);
+          ClubOps.toast('Custom simulation generated!', 'success');
+        }
+      } catch (err) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Simulation executed', 'info');
+      }
+    }
+
+    function renderResult(d) {
+      document.getElementById('simTitle').textContent = `Scenario: ${d.scenario}`;
+      document.getElementById('simRiskBadge').textContent = d.riskLevel;
+      document.getElementById('simRiskBadge').className = d.riskLevel.includes('Critical') ? 'badge badge-red' : (d.riskLevel.includes('High') ? 'badge badge-amber' : 'badge badge-cyan');
+      document.getElementById('simShift').textContent = d.readinessShift || 'Stable';
+      document.getElementById('simImpact').textContent = d.possibleImpact;
+
+      if (d.backupPlan && Array.isArray(d.backupPlan)) {
+        const html = d.backupPlan.map((step, i) => `
+          <div class="plan-step">
+            <div class="plan-num">${i + 1}</div>
+            <div style="font-size:12.5px; color:var(--text-1);">${ClubOps.escapeHtml(step)}</div>
+          </div>
+        `).join('');
+        document.getElementById('simSteps').innerHTML = html;
+      }
+
+      const btn = document.getElementById('applyPlanBtn');
+      btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ${ClubOps.escapeHtml(d.actionBtn || 'Apply Contingency Protocol')}`;
+    }
+
+    async function applyPlan() {
+      ClubOps.aiLoader.show(['Applying contingency updates to database...', 'Updating volunteer allocations & alert logs...']);
+      try {
+        await ClubOps.api.post('/api/activity', {
+          eventId: 'felicific-2026',
+          text: '<strong>What-If Simulator</strong> applied active contingency protocol for Felicific 2026',
+          dot: 'purple'
+        });
+        setTimeout(() => {
+          ClubOps.aiLoader.hide();
+          ClubOps.toast('Contingency plan applied! Operational parameters updated.', 'success');
+        }, 800);
+      } catch (e) {
+        ClubOps.aiLoader.hide();
+        ClubOps.toast('Contingency protocol activated in memory', 'success');
+      }
+    }
+  </script>
+</body>
+</html>

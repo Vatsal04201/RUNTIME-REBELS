@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubOps AI — Live Event Day Command Room</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .command-header {
+      background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.15), transparent 60%),
+                  linear-gradient(135deg, rgba(20, 26, 46, 0.9), rgba(10, 14, 26, 0.95));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+      animation: pulse-red 1.2s infinite;
+    }
+    @keyframes pulse-red {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+    .stage-board {
+      background: rgba(15, 20, 36, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      position: relative;
+    }
+    .stage-time {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--cyan);
+      line-height: 1;
+      margin: 10px 0;
+    }
+    .zone-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+    .dispatch-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      color: var(--text-0);
+      font-weight: 600;
+      text-align: left;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .dispatch-btn:hover {
+      border-color: var(--cyan);
+      background: rgba(34, 211, 238, 0.08);
+      transform: translateY(-2px);
+    }
+    .dispatch-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body data-page="eventday">
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <!-- Live Command Topbar Banner -->
+      <div class="command-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
+            <span class="live-badge"><span class="live-pulse-dot"></span> LIVE COMMAND ACTIVE</span>
+            <span style="color:var(--text-2); font-size:13px;">• Felicific 2026 Operations Bridge</span>
+          </div>
+          <h1 style="font-size:26px; font-weight:800; color:var(--text-0); margin:0;">DDU Main Auditorium & Stage 1</h1>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="event-sos.html" class="btn" style="background:rgba(239, 68, 68, 0.2); border:1px solid #ef4444; color:#fca5a5;">
+            <i class="fa-solid fa-kit-medical"></i> Emergency SOS
+          </a>
+          <button class="btn btn-primary" onclick="refreshCommandStats()"><i class="fa-solid fa-rotate"></i> Sync Live Feeds</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Metrics -->
+      <div class="grid grid-4" style="margin-bottom: 24px;">
+        <div class="card card-glow">
+          <span class="card-sub"><i class="fa-solid fa-users" style="color:var(--cyan);"></i> Live Attendees In Hall</span>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;">
+            <div style="font-size:32px; font-weight:800; color:var(--text-0);" id="liveGuestCount">82 <span style="font-size:16px; color:var(--text-2);">/ 100</span></div>
+            <span class="badge badge-green">82% Capacity</span>
+          </div>
+          <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:10px; margin-top:10px; overflow:hidden;">
+            <div style="width:82%; height:100%; background:linear-gradient(90deg, var(--cyan), var(--blue));" id="guestBar"></div>
+          </div>
+        </div>
+
+        <div class="card card-glow">
+          <span class="card-sub"><i class="fa-solid fa-people-group" style="color:var(--purple);"></i> Volunteers On Duty</span>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;">
+            <div style="font-size:32px; font-weight:800; color:var(--text-0);" id="liveVolCount">18 <span style="font-size:16px; color:var(--text-2);">/ 20</span></div>
+            <span class="badge badge-cyan">90% Present</span>
+          </div>
+          <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:10px; margin-top:10px; overflow:hidden;">
+            <div style="width:90%; height:100%; background:linear-gradient(90deg, var(--purple), var(--indigo));" id="volBar"></div>
+          </div>
+        </div>
+
+        <div class="card card-glow">
+          <span class="card-sub"><i class="fa-solid fa-truck" style="color:var(--green);"></i> Vendor Check-In</span>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;">
+            <div style="font-size:32px; font-weight:800; color:var(--text-0);">6 <span style="font-size:16px; color:var(--text-2);">/ 6</span></div>
+            <span class="badge badge-green">All On-Site</span>
+          </div>
+          <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:10px; margin-top:10px; overflow:hidden;">
+            <div style="width:100%; height:100%; background:var(--green);"></div>
+          </div>
+        </div>
+
+        <div class="card card-glow">
+          <span class="card-sub"><i class="fa-solid fa-shield-halved" style="color:var(--amber);"></i> Radar Alert Status</span>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;">
+            <div style="font-size:32px; font-weight:800; color:#34d399;">STABLE</div>
+            <span class="badge badge-green">0 Breaches</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-2); margin-top:8px;">
+            Generator & backup audio active
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Command Grid -->
+      <div class="grid grid-3" style="grid-template-columns: 1.4fr 1fr 1fr; gap: 24px;">
+
+        <!-- Center Stage Run-Sheet -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-microphone-lines" style="color:var(--cyan);"></i> Stage 1 Live Run-Sheet</div>
+            <span class="badge badge-cyan"><i class="fa-solid fa-circle-play"></i> Running Now</span>
+          </div>
+
+          <div class="stage-board">
+            <div style="font-size:13px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em;">Current Live Segment:</div>
+            <h2 style="font-size:22px; color:var(--text-0); margin-top:4px;" id="currentSegmentName">Chief Guest Address & Lamp Lighting</h2>
+            <div style="display:flex; align-items:center; gap:16px; margin:12px 0;">
+              <div>
+                <div style="font-size:11px; color:var(--text-2);">TIME ELAPSED</div>
+                <div class="stage-time" id="stageTimer">24:18</div>
+              </div>
+              <div style="border-left:1px solid var(--border); padding-left:16px;">
+                <div style="font-size:11px; color:var(--text-2);">ALLOCATED DURATION</div>
+                <div style="font-size:20px; font-weight:700; color:var(--text-0);">30 mins</div>
+              </div>
+            </div>
+            <div style="font-size:12.5px; color:var(--text-1); line-height:1.5;">
+              <span><i class="fa-solid fa-user-tie" style="color:var(--cyan);"></i> Speaker: Prof. S. K. Joshi</span> &nbsp;|&nbsp;
+              <span><i class="fa-solid fa-user-shield" style="color:var(--purple);"></i> Stage Lead: Sneha</span>
+            </div>
+          </div>
+
+          <div style="margin-top:16px; display:flex; gap:10px;">
+            <button class="btn btn-primary" style="flex:1;" onclick="nextSegment()"><i class="fa-solid fa-forward-step"></i> Advance to Next Segment</button>
+            <button class="btn btn-ghost" onclick="addStageBuffer()"><i class="fa-solid fa-stopwatch"></i> +5 Min Buffer</button>
+          </div>
+
+          <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-2); text-transform:uppercase; margin-bottom:8px;">Next In Queue:</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.03); border-radius:var(--radius-sm); border:1px solid var(--border);">
+              <div>
+                <strong style="color:var(--text-0); font-size:13.5px;" id="nextSegmentName">Keynote: Next-Gen AI in College Operations</strong>
+                <div style="font-size:11.5px; color:var(--text-2);">Speaker: Dr. Anil Kumar • 06:45 PM</div>
+              </div>
+              <span class="badge badge-purple">Ready Backstage</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone Readiness & Volunteer Status -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-map-pin" style="color:var(--purple);"></i> Operational Zones</div>
+            <span class="card-sub">Real-Time Team Posts</span>
+          </div>
+
+          <div class="zone-row">
+            <div>
+              <strong style="color:var(--text-0); font-size:13px;">Registration Desk</strong>
+              <div style="font-size:11px; color:var(--text-2);">Vrunda & Amit (Lead)</div>
+            </div>
+            <span class="badge badge-green"><i class="fa-solid fa-check"></i> 4/4 Present</span>
+          </div>
+
+          <div class="zone-row">
+            <div>
+              <strong style="color:var(--text-0); font-size:13px;">Stage & Acoustics</strong>
+              <div style="font-size:11px; color:var(--text-2);">Rahul & SoundCraft Audio</div>
+            </div>
+            <span class="badge badge-green"><i class="fa-solid fa-check"></i> 3/3 Present</span>
+          </div>
+
+          <div class="zone-row">
+            <div>
+              <strong style="color:var(--text-0); font-size:13px;">VIP Hospitality Suite</strong>
+              <div style="font-size:11px; color:var(--text-2);">Sneha & Ishita</div>
+            </div>
+            <span class="badge badge-green"><i class="fa-solid fa-check"></i> 3/3 Present</span>
+          </div>
+
+          <div class="zone-row">
+            <div>
+              <strong style="color:var(--text-0); font-size:13px;">Logistics & Courtyard</strong>
+              <div style="font-size:11px; color:var(--text-2);">Pooja & Rohan</div>
+            </div>
+            <span class="badge badge-green"><i class="fa-solid fa-check"></i> 4/4 Present</span>
+          </div>
+
+          <div class="zone-row">
+            <div>
+              <strong style="color:var(--text-0); font-size:13px;">Security & Gate A</strong>
+              <div style="font-size:11px; color:var(--text-2);">Campus Guards + 2 Vols</div>
+            </div>
+            <span class="badge badge-green"><i class="fa-solid fa-check"></i> Clear</span>
+          </div>
+
+          <div style="margin-top:16px;">
+            <a href="volunteers.html" class="btn btn-ghost" style="width:100%; text-align:center; display:block;">
+              <i class="fa-solid fa-people-group"></i> Manage Full Volunteer Roster
+            </a>
+          </div>
+        </div>
+
+        <!-- Rapid Dispatch Actions & Activity -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-bolt" style="color:var(--amber);"></i> Rapid Dispatch</div>
+            <span class="card-sub">1-Click Actions</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="dispatch-btn" onclick="dispatchBroadcast()">
+              <div class="dispatch-icon" style="background:rgba(34, 211, 238, 0.15); color:var(--cyan);">
+                <i class="fa-brands fa-whatsapp"></i>
+              </div>
+              <div>
+                <div>WhatsApp Lead Ping</div>
+                <div style="font-size:11px; color:var(--text-2); font-weight:normal;">Send sync reminder to all 20 leads</div>
+              </div>
+            </button>
+
+            <button class="dispatch-btn" onclick="quickGuestCheckin()">
+              <div class="dispatch-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--green);">
+                <i class="fa-solid fa-qrcode"></i>
+              </div>
+              <div>
+                <div>Fast VIP Check-In</div>
+                <div style="font-size:11px; color:var(--text-2); font-weight:normal;">Instantly mark arriving delegate</div>
+              </div>
+            </button>
+
+            <button class="dispatch-btn" onclick="requestSecurity()">
+              <div class="dispatch-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--amber);">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <div>Crowd Flow Alert</div>
+                <div style="font-size:11px; color:var(--text-2); font-weight:normal;">Deploy foyer queue dividers</div>
+              </div>
+            </button>
+
+            <a href="event-sos.html" class="dispatch-btn" style="border-color:rgba(239, 68, 68, 0.4); text-decoration:none;">
+              <div class="dispatch-icon" style="background:rgba(239, 68, 68, 0.2); color:#ef4444;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <div style="color:#fca5a5;">Trigger Event SOS</div>
+                <div style="font-size:11px; color:var(--text-2); font-weight:normal;">Mic failure, speaker cancel, rain</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    let seconds = 24 * 60 + 18;
+    setInterval(() => {
+      seconds++;
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      const el = document.getElementById('stageTimer');
+      if (el) el.textContent = `${m}:${s}`;
+    }, 1000);
+
+    async function refreshCommandStats() {
+      try {
+        const [gRes, vRes] = await Promise.all([
+          ClubOps.api.get('/api/guests?eventId=felicific-2026'),
+          ClubOps.api.get('/api/volunteers?eventId=felicific-2026')
+        ]);
+
+        if (gRes.success && gRes.data) {
+          const arr = gRes.data.filter(g => g.checkedIn === 1).length;
+          const total = gRes.data.length || 100;
+          document.getElementById('liveGuestCount').innerHTML = `${arr} <span style="font-size:16px; color:var(--text-2);">/ ${total}</span>`;
+          const pct = Math.round((arr / total) * 100);
+          document.getElementById('guestBar').style.width = `${pct}%`;
+        }
+
+        if (vRes.success && vRes.data) {
+          const checked = vRes.data.filter(v => v.checkedIn === 1).length;
+          const totalVols = vRes.data.length || 20;
+          document.getElementById('liveVolCount').innerHTML = `${checked} <span style="font-size:16px; color:var(--text-2);">/ ${totalVols}</span>`;
+          const volPct = Math.round((checked / totalVols) * 100);
+          document.getElementById('volBar').style.width = `${volPct}%`;
+        }
+
+        ClubOps.toast('Live telemetry synchronized from SQLite!', 'success');
+      } catch (e) {
+        ClubOps.toast('Synced status from local controller', 'info');
+      }
+    }
+
+    function nextSegment() {
+      const cur = document.getElementById('currentSegmentName');
+      const nxt = document.getElementById('nextSegmentName');
+      cur.textContent = nxt.textContent;
+      nxt.textContent = 'Live Band Showcase & Cultural Extravaganza • 07:45 PM';
+      seconds = 0;
+      ClubOps.toast('Stage cues updated: Keynote address commenced!', 'success');
+    }
+
+    function addStageBuffer() {
+      ClubOps.toast('Added 5-minute buffer to current stage address', 'info');
+    }
+
+    function dispatchBroadcast() {
+      ClubOps.toast('WhatsApp broadcast queued to all 20 leads via ClubOps dispatcher!', 'success');
+    }
+
+    function requestSecurity() {
+      ClubOps.toast('Campus security lead pinged for foyer corridor assistance', 'info');
+    }
+
+    function quickGuestCheckin() {
+      ClubOps.modal.open({
+        title: 'Instant VIP Fast-Track Check-In',
+        body: `
+          <div class="form-grid">
+            <div class="field">
+              <label class="label">Guest / Delegate Name</label>
+              <input type="text" class="input" id="quickGuestName" placeholder="e.g. Dr. Anil Kumar (Keynote)">
+            </div>
+            <div class="field">
+              <label class="label">Category</label>
+              <select class="select" id="quickGuestCat">
+                <option value="Chief Guest">Chief Guest</option>
+                <option value="Faculty" selected>Faculty / Delegate</option>
+                <option value="VIP">VIP</option>
+              </select>
+            </div>
+          </div>
+        `,
+        actions: [
+          { label: 'Cancel', className: 'btn-ghost' },
+          {
+            label: 'Check In & Issue Badge',
+            className: 'btn-primary',
+            icon: 'fa-check',
+            onClick: async () => {
+              const name = document.getElementById('quickGuestName').value;
+              if (!name) return ClubOps.toast('Please provide a name', 'warn');
+              try {
+                await ClubOps.api.post('/api/guests', {
+                  name,
+                  category: document.getElementById('quickGuestCat').value,
+                  rsvp: 'Confirmed',
+                  checkedIn: 1,
+                  eventId: 'felicific-2026'
+                });
+                ClubOps.toast(`Guest "${name}" checked in successfully!`, 'success');
+                refreshCommandStats();
+              } catch (e) {
+                ClubOps.toast(`Guest "${name}" registered on terminal`, 'success');
+              }
+            }
+          }
+        ]
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', refreshCommandStats);
+  </script>
+</body>
+</html>

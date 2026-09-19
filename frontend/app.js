@@ -422,7 +422,10 @@ function initLoginModal() {
       const email = document.getElementById('collegeEmail').value;
       const role = document.getElementById('collegeRole').value;
       closeModal();
-      showToast('Welcome to ClubOps AI', `Signed in as ${role.toUpperCase()} (${email}). Welcome to the command center!`, 'success');
+      showToast('Welcome to ClubOps AI', `Signed in as ${role.toUpperCase()} (${email}). Launching Dashboard...`, 'success');
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 600);
     });
   }
 }

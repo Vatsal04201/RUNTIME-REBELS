@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { run, get, all } = require('../database/database');
+const gemini = require('../services/geminiService');
 
 const KNOWN_MEMBERS = ['Rahul', 'Vrunda', 'Helli', 'Arjun', 'Sneha', 'Pooja', 'Aman', 'Kavya', 'Amit', 'Ishita', 'Rohan', 'Priya', 'Kunal', 'Suresh'];
 
@@ -264,6 +265,15 @@ router.post('/generate-letter', async (req, res) => {
       volunteers: 20
     };
 
+    try {
+      const geminiDoc = await gemini.generateDocumentWithGemini(type, event);
+      if (geminiDoc && geminiDoc.content) {
+        return res.json({ success: true, type, title: geminiDoc.title || `Official Document — ${event.name}`, content: geminiDoc.content });
+      }
+    } catch (gErr) {
+      console.warn('Gemini generateDocument error:', gErr.message);
+    }
+
     if (type === 'dean_permission') {
       const letter = `TO:
 The Dean of Student Affairs,
@@ -368,44 +378,53 @@ router.post('/generate-plan', async (req, res) => {
   try {
     const { eventName = 'Felicific 2026', type = 'Cultural & Tech Festival', eventId = 'felicific-2026' } = req.body;
 
-    const plan = {
-      title: `AI Master Execution Plan: ${eventName}`,
-      type,
-      phases: [
-        {
-          phase: 'Phase 1: Before Event',
-          status: 'In Progress',
-          tasks: [
-            'Book Main Auditorium & obtain Dean permission sign-off',
-            'Finalize sound & lighting vendor contracts',
-            'Assign 20 student volunteers across 6 operational zones',
-            'Print 50 participation certificates and winner trophies',
-            'Deploy QR fast-track registration link to all attendees'
-          ]
-        },
-        {
-          phase: 'Phase 2: Event Day',
-          status: 'Ready',
-          tasks: [
-            'Open QR check-in desks at Main Entrance Gate A & B',
-            'Escort Chief Guest and Faculty to VIP lounge',
-            'Perform secondary microphone frequency audio test',
-            'Oversee live stage cues and lighting transitions',
-            'Monitor generator unit and electrical safety status'
-          ]
-        },
-        {
-          phase: 'Phase 3: After Event',
-          status: 'Scheduled',
-          tasks: [
-            'Collect attendee satisfaction and feedback responses',
-            'Conduct auditorium clean-up and damage inspection sign-off',
-            'Disburse final payments and balance settlements to vendors',
-            'Generate official ClubOps AI Post-Event Retrospective Report'
-          ]
-        }
-      ]
-    };
+    let plan = null;
+    try {
+      plan = await gemini.generateMasterPlanWithGemini(eventName, type);
+    } catch (e) {
+      console.warn('Gemini generateMasterPlan error:', e.message);
+    }
+
+    if (!plan) {
+      plan = {
+        title: `AI Master Execution Plan: ${eventName}`,
+        type,
+        phases: [
+          {
+            phase: 'Phase 1: Before Event',
+            status: 'In Progress',
+            tasks: [
+              'Book Main Auditorium & obtain Dean permission sign-off',
+              'Finalize sound & lighting vendor contracts',
+              'Assign 20 student volunteers across 6 operational zones',
+              'Print 50 participation certificates and winner trophies',
+              'Deploy QR fast-track registration link to all attendees'
+            ]
+          },
+          {
+            phase: 'Phase 2: Event Day',
+            status: 'Ready',
+            tasks: [
+              'Open QR check-in desks at Main Entrance Gate A & B',
+              'Escort Chief Guest and Faculty to VIP lounge',
+              'Perform secondary microphone frequency audio test',
+              'Oversee live stage cues and lighting transitions',
+              'Monitor generator unit and electrical safety status'
+            ]
+          },
+          {
+            phase: 'Phase 3: After Event',
+            status: 'Scheduled',
+            tasks: [
+              'Collect attendee satisfaction and feedback responses',
+              'Conduct auditorium clean-up and damage inspection sign-off',
+              'Disburse final payments and balance settlements to vendors',
+              'Generate official ClubOps AI Post-Event Retrospective Report'
+            ]
+          }
+        ]
+      };
+    }
 
     res.json({ success: true, plan });
   } catch (err) {

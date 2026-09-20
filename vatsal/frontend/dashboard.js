@@ -41,9 +41,9 @@ function initUserGreeting() {
     timeGreeting = 'Good evening';
   }
 
-  let displayName = 'Organizer';
+  let displayName = '';
   let displayRole = 'Club Operations';
-  let avatarChar = 'O';
+  let avatarChar = 'C';
 
   try {
     const stored = localStorage.getItem('clubops_user');
@@ -52,9 +52,9 @@ function initUserGreeting() {
       if (user.roleTitle) {
         displayRole = user.roleTitle;
       }
-      if (user.email) {
+      if (user.email && typeof user.email === 'string') {
         const prefix = user.email.split('@')[0];
-        if (prefix && prefix.length > 0) {
+        if (prefix && prefix.length > 0 && prefix !== 'lead' && prefix !== 'user' && prefix !== 'admin') {
           const cleanName = prefix.split(/[._-]/)[0];
           displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
           avatarChar = displayName.charAt(0).toUpperCase();
@@ -66,10 +66,14 @@ function initUserGreeting() {
   }
 
   if (greetingEl) {
-    greetingEl.innerHTML = `${timeGreeting}, ${displayName} <span class="wave">👋</span>`;
+    if (displayName) {
+      greetingEl.innerHTML = `${timeGreeting}, ${displayName} <span class="wave">👋</span>`;
+    } else {
+      greetingEl.innerHTML = `${timeGreeting} <span class="wave">👋</span>`;
+    }
   }
   if (userNameEl) {
-    userNameEl.textContent = displayName;
+    userNameEl.textContent = displayName || displayRole;
   }
   if (userRoleEl) {
     userRoleEl.textContent = displayRole;

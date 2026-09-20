@@ -433,16 +433,20 @@ function initLoginModal() {
     if (e) e.preventDefault();
     const emailInput = document.getElementById('collegeEmail');
     const roleSelect = document.getElementById('collegeRole');
-    const email = emailInput && emailInput.value ? emailInput.value.trim() : 'lead@collegeclub.edu';
+    const email = emailInput && emailInput.value ? emailInput.value.trim() : '';
     const role = roleSelect ? roleSelect.value : 'operations';
     const roleTitle = roleSelect && roleSelect.options[roleSelect.selectedIndex] ? roleSelect.options[roleSelect.selectedIndex].text : 'Club Organizer';
 
-    // Save user session so dashboard can display proper role/name dynamically
-    localStorage.setItem('clubops_user', JSON.stringify({
-      email: email,
-      role: role,
-      roleTitle: roleTitle
-    }));
+    // Save user session only if email provided, otherwise remove stored user to prevent default values
+    if (email) {
+      localStorage.setItem('clubops_user', JSON.stringify({
+        email: email,
+        role: role,
+        roleTitle: roleTitle
+      }));
+    } else {
+      localStorage.removeItem('clubops_user');
+    }
 
     closeModal();
     showToast('Welcome to ClubOps AI', `Signed in as ${roleTitle}. Launching Dashboard...`, 'success');

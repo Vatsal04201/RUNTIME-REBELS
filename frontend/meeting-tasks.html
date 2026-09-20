@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClubOps AI — Meeting to Tasks & Audio STT</title>
+  <title>ClubOps AI — Meeting to Tasks</title>
   <link rel="stylesheet" href="shared.css">
   <style>
     .sample-pill {
@@ -19,48 +19,6 @@
     .sample-pill:hover {
       background: rgba(34, 211, 238, 0.22);
     }
-    .audio-hub-box {
-      background: linear-gradient(135deg, rgba(34, 211, 238, 0.05), rgba(99, 102, 241, 0.05));
-      border: 1px solid rgba(34, 211, 238, 0.25);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      position: relative;
-    }
-    .audio-dropzone {
-      border: 1.5px dashed rgba(34, 211, 238, 0.35);
-      border-radius: 10px;
-      background: rgba(10, 15, 30, 0.5);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      padding: 14px;
-    }
-    .audio-dropzone:hover, .audio-dropzone.dragover {
-      border-color: var(--cyan);
-      background: rgba(34, 211, 238, 0.09);
-      box-shadow: 0 0 16px rgba(34, 211, 238, 0.18);
-    }
-    .recording-pulse-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #ef4444;
-      box-shadow: 0 0 10px #ef4444;
-      display: inline-block;
-      animation: pulseRecording 1s infinite alternate;
-    }
-    @keyframes pulseRecording {
-      from { opacity: 0.4; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1.25); }
-    }
-    .pulse-highlight {
-      animation: borderGlow 1.5s ease-in-out;
-    }
-    @keyframes borderGlow {
-      0% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
-      50% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.6); border-color: var(--cyan); }
-      100% { box-shadow: 0 0 0 rgba(34, 211, 238, 0); }
-    }
   </style>
 </head>
 <body data-page="meeting">
@@ -72,7 +30,7 @@
       <header class="topbar">
         <div class="page-title">
           <h1><i class="fa-solid fa-microphone-lines" style="color:var(--cyan);"></i> Meeting & WhatsApp Discussion → Auto Tasks <span class="badge-ai">Core AI</span></h1>
-          <p>Import voice audio or paste meeting notes. ClubOps AI parses assignees, deadlines, and priorities directly into your SQLite task database.</p>
+          <p>Paste informal meeting notes or voice transcript. ClubOps AI parses assignees, deadlines, and priorities directly into your task database.</p>
         </div>
       </header>
 
@@ -80,112 +38,28 @@
         <!-- Input Column -->
         <div class="card card-glow">
           <div class="card-header">
-            <div class="card-title"><i class="fa-solid fa-comments"></i> Raw Meeting Notes / Audio</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <button type="button" class="sample-pill" onclick="loadSample(1)">Sample 1: Tech & Stage</button>
-              <button type="button" class="sample-pill" onclick="loadSample(2)">Sample 2: Hospitality</button>
-            </div>
-          </div>
-
-          <!-- Target Event Selector -->
-          <div class="field" style="margin-bottom: 14px;">
-            <label for="eventSelect" style="font-size:12px; font-weight:600; color:var(--text-1); display:flex; align-items:center; gap:6px;">
-              <i class="fa-solid fa-calendar-check" style="color:var(--cyan);"></i> Assign Tasks To Event:
-            </label>
-            <select id="eventSelect" class="form-control" style="background:var(--bg-input, #0d121f); border:1px solid var(--border); color:var(--text-0); border-radius:8px; padding:7px 12px; width:100%; font-size:13px;">
-              <option value="felicific-2026">Felicific 2026 (Annual Cultural Fest)</option>
-              <option value="techfest-2026">TechFest 2026 (National Technical Symposium)</option>
-              <option value="hackathon-2026">CodeStorm Hackathon 2026</option>
-              <option value="sports-meet-2026">Inter-College Sports Meet 2026</option>
-            </select>
-          </div>
-
-          <!-- Audio Import & STT Feature Box -->
-          <div class="audio-hub-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <i class="fa-solid fa-file-audio" style="color:var(--cyan); font-size:16px;"></i>
-                <strong style="font-size:13px; color:var(--text-0);">Audio Import & Free STT</strong>
-                <span class="badge badge-cyan" style="font-size:10px;"><i class="fa-solid fa-bolt"></i> Gemini STT</span>
-              </div>
-              <div style="display:flex; gap:6px;">
-                <button type="button" class="btn btn-ghost btn-sm" id="btnLiveMic" onclick="toggleLiveMic()" style="border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; font-size:11.5px; padding:4px 10px;">
-                  <i class="fa-solid fa-microphone"></i> <span id="micBtnText">Live Mic</span>
-                </button>
-                <button type="button" class="sample-pill" onclick="loadSampleAudioDemo()" title="Test with simulated meeting voice note">
-                  <i class="fa-solid fa-music"></i> Demo Audio
-                </button>
-              </div>
-            </div>
-
-            <!-- Drag & Drop Audio Upload Area -->
-            <div id="audioDropZone" class="audio-dropzone" onclick="document.getElementById('audioFileInput').click()" ondragover="handleAudioDragOver(event)" ondragleave="handleAudioDragLeave(event)" ondrop="handleAudioDrop(event)">
-              <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm,.aac,.flac" style="display:none;" onchange="handleAudioFileSelect(event)">
-              
-              <!-- Initial Prompt State -->
-              <div id="dropZonePrompt" style="display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;">
-                <div style="width:38px; height:38px; border-radius:50%; background:rgba(34,211,238,0.12); display:flex; align-items:center; justify-content:center; color:var(--cyan); font-size:17px;">
-                  <i class="fa-solid fa-cloud-arrow-up"></i>
-                </div>
-                <div>
-                  <span style="font-weight:600; color:var(--text-0); font-size:12.5px;">Click to import audio</span> or drag and drop
-                </div>
-                <div style="font-size:11px; color:var(--text-2);">
-                  Supports MP3, WAV, M4A, OGG, WEBM, AAC (Transcribed via Free Google Gemini STT)
-                </div>
-              </div>
-
-              <!-- Selected Audio Preview State -->
-              <div id="selectedAudioState" style="display:none; flex-direction:column; gap:8px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                  <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
-                    <i class="fa-solid fa-file-waveform" style="color:var(--cyan); font-size:18px;"></i>
-                    <span id="audioFileName" style="font-weight:600; font-size:12px; color:var(--text-0); text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:210px;">recording.mp3</span>
-                    <span id="audioFileSize" class="badge badge-gray" style="font-size:10px;">1.2 MB</span>
-                  </div>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="clearSelectedAudio(event)" style="padding:2px 8px; font-size:11px; color:var(--text-2);">
-                    <i class="fa-solid fa-trash-can"></i> Remove
-                  </button>
-                </div>
-                <audio id="audioPreviewPlayer" controls style="width:100%; height:32px; border-radius:6px; margin-top:2px;"></audio>
-              </div>
-            </div>
-
-            <!-- Live Mic Indicator (Shown when recording) -->
-            <div id="liveMicIndicator" style="display:none; margin-top:10px; padding:8px 12px; background:rgba(239, 68, 68, 0.12); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; align-items:center; justify-content:space-between;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span class="recording-pulse-dot"></span>
-                <span style="font-size:12px; color:#fca5a5; font-weight:500;">Listening to live speech... Speak clearly into your mic.</span>
-              </div>
-              <span id="micTimer" style="font-family:var(--font-mono, monospace); font-size:12px; color:#f87171;">00:00</span>
-            </div>
-
-            <!-- Audio STT Action Bar -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:8px;">
-              <div id="sttStatusText" style="font-size:11.5px; color:var(--text-2);">
-                <i class="fa-solid fa-circle-info"></i> Import audio file or use live mic to auto-fill notes
-              </div>
-              <button type="button" class="btn btn-primary btn-sm" id="btnTranscribe" onclick="transcribeImportedAudio()" style="display:none; background: linear-gradient(135deg, #06b6d4, #3b82f6); box-shadow: 0 0 14px rgba(6, 182, 212, 0.35);">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Transcribe with Free Gemini STT
-              </button>
+            <div class="card-title"><i class="fa-solid fa-comments"></i> Raw Meeting Notes / Chat</div>
+            <div style="display:flex; gap:6px;">
+              <button class="sample-pill" onclick="loadSample(1)">Sample 1: Tech & Stage</button>
+              <button class="sample-pill" onclick="loadSample(2)">Sample 2: Hospitality</button>
             </div>
           </div>
 
           <div class="field">
-            <label for="transcriptInput">Meeting Transcript, Discussion Notes, or Voice Text:</label>
-            <textarea id="transcriptInput" rows="9" placeholder="Example:
+            <label for="transcriptInput">Paste Audio Transcript, WhatsApp Chat, or Notes:</label>
+            <textarea id="transcriptInput" rows="10" placeholder="Example:
 Rahul will inspect Stage 2 sound system today.
 Vrunda to confirm photographer booking on Friday.
 Operations team to print 50 certificates tomorrow.
-Pooja must coordinate backup generator fuel check ASAP.">Rahul will inspect the Stage 2 sound system today.
+Pooja to coordinate backup generator fuel check ASAP.">Rahul will inspect the Stage 2 sound system today.
 Vrunda to confirm photographer booking by Friday.
 Operations team to print 50 certificates tomorrow.
 Pooja must coordinate backup generator fuel check ASAP.
 Arjun will test wireless microphone frequencies today.</textarea>
           </div>
 
-          <div style="margin-top: 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div style="font-size:12px; color:var(--text-2);"><i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Auto-detects team members, roles, deadlines, etc.</div>
+          <div style="margin-top: 16px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:12px; color:var(--text-2);"><i class="fa-solid fa-bolt"></i> Auto-detects team members, roles, deadlines, etc.</div>
             <button class="btn btn-primary" id="btnExtract" onclick="extractTasks()">
               <i class="fa-solid fa-wand-magic-sparkles"></i> Extract & Save to Database
             </button>
@@ -202,7 +76,7 @@ Arjun will test wireless microphone frequencies today.</textarea>
           <div id="extractionResults" style="display:flex; flex-direction:column; gap:10px; min-height: 260px;">
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:240px; color:var(--text-3); text-align:center;">
               <i class="fa-solid fa-brain" style="font-size:36px; margin-bottom:12px; opacity:0.5;"></i>
-              <p>Import audio, use live mic, or click <strong>"Extract & Save to Database"</strong> to parse conversational text into actionable items.</p>
+              <p>Click <strong>"Extract & Save to Database"</strong> to parse conversational text into actionable items.</p>
             </div>
           </div>
 
@@ -216,27 +90,6 @@ Arjun will test wireless microphone frequencies today.</textarea>
 
   <script src="shared.js"></script>
   <script>
-    let selectedAudioFile = null;
-    let speechRecognitionInstance = null;
-    let isRecordingLive = false;
-    let micTimerInterval = null;
-    let micSeconds = 0;
-
-    // Load available events on startup
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const res = await ClubOps.api.get('/api/events');
-        if (res && res.success && Array.isArray(res.events) && res.events.length > 0) {
-          const select = document.getElementById('eventSelect');
-          select.innerHTML = res.events.map(ev => `
-            <option value="${ev.id}">${ClubOps.escapeHtml(ev.name)} (${ev.category || 'Event'})</option>
-          `).join('');
-        }
-      } catch (err) {
-        console.warn('Using default events list:', err);
-      }
-    });
-
     function loadSample(n) {
       const textarea = document.getElementById('transcriptInput');
       if (n === 1) {
@@ -247,237 +100,12 @@ Arjun will test wireless microphone frequencies today.</textarea>
       ClubOps.toast('Sample transcript loaded!', 'info');
     }
 
-    function handleAudioDragOver(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('audioDropZone').classList.add('dragover');
-    }
-
-    function handleAudioDragLeave(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('audioDropZone').classList.remove('dragover');
-    }
-
-    function handleAudioDrop(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('audioDropZone').classList.remove('dragover');
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        setupSelectedAudio(files[0]);
-      }
-    }
-
-    function handleAudioFileSelect(e) {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        setupSelectedAudio(files[0]);
-      }
-    }
-
-    function setupSelectedAudio(file) {
-      if (!file.type.startsWith('audio/') && !/\.(mp3|wav|m4a|ogg|webm|aac|flac)$/i.test(file.name)) {
-        ClubOps.toast('Please select a valid audio file (.mp3, .wav, .m4a, .webm, .ogg)', 'warn');
-        return;
-      }
-
-      selectedAudioFile = file;
-      document.getElementById('audioFileName').textContent = file.name;
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      document.getElementById('audioFileSize').textContent = `${sizeMB} MB`;
-
-      const player = document.getElementById('audioPreviewPlayer');
-      player.src = URL.createObjectURL(file);
-
-      document.getElementById('dropZonePrompt').style.display = 'none';
-      document.getElementById('selectedAudioState').style.display = 'flex';
-      document.getElementById('btnTranscribe').style.display = 'inline-flex';
-      document.getElementById('sttStatusText').innerHTML = `<span style="color:var(--cyan);"><i class="fa-solid fa-file-audio"></i> Ready:</span> ${ClubOps.escapeHtml(file.name)} (${sizeMB} MB)`;
-      ClubOps.toast(`Audio loaded: ${file.name}`, 'info');
-    }
-
-    function clearSelectedAudio(e) {
-      if (e) e.stopPropagation();
-      selectedAudioFile = null;
-      document.getElementById('audioFileInput').value = '';
-      const player = document.getElementById('audioPreviewPlayer');
-      player.pause();
-      player.removeAttribute('src');
-
-      document.getElementById('dropZonePrompt').style.display = 'flex';
-      document.getElementById('selectedAudioState').style.display = 'none';
-      document.getElementById('btnTranscribe').style.display = 'none';
-      document.getElementById('sttStatusText').innerHTML = '<i class="fa-solid fa-circle-info"></i> Import audio file or use live mic to auto-fill notes';
-    }
-
-    async function transcribeImportedAudio() {
-      if (!selectedAudioFile) {
-        ClubOps.toast('Please select an audio file first', 'warn');
-        return;
-      }
-
-      ClubOps.aiLoader.show([
-        'Reading audio recording and encoding stream...',
-        'Connecting to Google Gemini Multimodal STT model...',
-        'Transcribing speech into structured operational notes...',
-        'Recognizing team member names, deadlines, and priorities...'
-      ]);
-
-      try {
-        const base64Data = await readFileAsBase64(selectedAudioFile);
-        const mimeType = selectedAudioFile.type || 'audio/mp3';
-
-        const res = await ClubOps.api.post('/api/ai/transcribe-audio', {
-          audioData: base64Data,
-          mimeType: mimeType
-        });
-
-        ClubOps.aiLoader.hide();
-
-        if (res && res.success && res.transcript) {
-          const textarea = document.getElementById('transcriptInput');
-          textarea.value = res.transcript;
-          textarea.classList.add('pulse-highlight');
-          setTimeout(() => textarea.classList.remove('pulse-highlight'), 1600);
-
-          document.getElementById('sttStatusText').innerHTML = `<span style="color:var(--emerald);"><i class="fa-solid fa-circle-check"></i> Audio successfully transcribed!</span>`;
-          ClubOps.toast('Audio converted to meeting notes! Click "Extract & Save" to parse tasks.', 'success');
-        } else {
-          fallbackAudioTranscription();
-        }
-      } catch (err) {
-        console.warn('Server audio transcription error:', err);
-        ClubOps.aiLoader.hide();
-        fallbackAudioTranscription();
-      }
-    }
-
-    function readFileAsBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function fallbackAudioTranscription() {
-      // Robust client simulation fallback in case backend is reloading or free quota hit
-      const simulatedNotes = `Rahul will inspect Stage 2 sound system today.\nVrunda to confirm photographer booking on Friday.\nOperations team to print 50 certificates tomorrow.\nPooja must coordinate backup generator fuel check ASAP.\nArjun will test wireless microphone frequencies today.`;
-      const textarea = document.getElementById('transcriptInput');
-      textarea.value = simulatedNotes;
-      textarea.classList.add('pulse-highlight');
-      setTimeout(() => textarea.classList.remove('pulse-highlight'), 1600);
-      document.getElementById('sttStatusText').innerHTML = `<span style="color:var(--cyan);"><i class="fa-solid fa-circle-check"></i> Audio transcript generated!</span>`;
-      ClubOps.toast('Audio transcribed successfully! Click "Extract & Save" to parse tasks.', 'success');
-    }
-
-    function loadSampleAudioDemo() {
-      const demoTranscript = `Rahul will verify auditorium Stage 2 lighting and sound console today.
-Vrunda to confirm catering package with Spice Route vendor by Friday.
-Transport team to print 100 VIP parking passes tomorrow morning.
-Pooja must coordinate backup diesel generator check ASAP.
-Arjun will test wireless handheld microphone channels today.`;
-      
-      const textarea = document.getElementById('transcriptInput');
-      textarea.value = demoTranscript;
-      textarea.classList.add('pulse-highlight');
-      setTimeout(() => textarea.classList.remove('pulse-highlight'), 1600);
-
-      document.getElementById('sttStatusText').innerHTML = `<span style="color:var(--cyan);"><i class="fa-solid fa-music"></i> Demo audio notes loaded.</span> Ready to extract!`;
-      ClubOps.toast('Demo audio recording transcript loaded!', 'info');
-    }
-
-    // Live Voice Dictation using Web Speech API
-    function toggleLiveMic() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        ClubOps.toast('Live microphone dictation is supported in Chrome/Edge. You can import any recorded audio file (.mp3, .wav) to transcribe with our Gemini STT model!', 'warn');
-        return;
-      }
-
-      if (isRecordingLive) {
-        stopLiveMic();
-      } else {
-        startLiveMic(SpeechRecognition);
-      }
-    }
-
-    function startLiveMic(SpeechRecognition) {
-      try {
-        speechRecognitionInstance = new SpeechRecognition();
-        speechRecognitionInstance.continuous = true;
-        speechRecognitionInstance.interimResults = true;
-        speechRecognitionInstance.lang = 'en-US';
-
-        const textarea = document.getElementById('transcriptInput');
-        let initialText = textarea.value.trim();
-
-        speechRecognitionInstance.onstart = () => {
-          isRecordingLive = true;
-          document.getElementById('liveMicIndicator').style.display = 'flex';
-          document.getElementById('micBtnText').textContent = 'Stop Mic';
-          document.getElementById('btnLiveMic').style.background = 'rgba(239, 68, 68, 0.2)';
-          micSeconds = 0;
-          document.getElementById('micTimer').textContent = '00:00';
-          micTimerInterval = setInterval(() => {
-            micSeconds++;
-            const m = String(Math.floor(micSeconds / 60)).padStart(2, '0');
-            const s = String(micSeconds % 60).padStart(2, '0');
-            document.getElementById('micTimer').textContent = `${m}:${s}`;
-          }, 1000);
-          ClubOps.toast('Listening... Speak meeting notes clearly.', 'info');
-        };
-
-        speechRecognitionInstance.onresult = (event) => {
-          let transcript = '';
-          for (let i = 0; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript + ' ';
-          }
-          textarea.value = (initialText ? initialText + '\n' : '') + transcript.trim();
-        };
-
-        speechRecognitionInstance.onerror = (event) => {
-          console.warn('Speech recognition error:', event.error);
-          stopLiveMic();
-          ClubOps.toast(`Microphone event: ${event.error}`, 'warn');
-        };
-
-        speechRecognitionInstance.onend = () => {
-          stopLiveMic();
-        };
-
-        speechRecognitionInstance.start();
-      } catch (e) {
-        console.error('Speech recognition start failed:', e);
-        ClubOps.toast('Could not start microphone: ' + e.message, 'error');
-      }
-    }
-
-    function stopLiveMic() {
-      isRecordingLive = false;
-      if (speechRecognitionInstance) {
-        try { speechRecognitionInstance.stop(); } catch (err) {}
-        speechRecognitionInstance = null;
-      }
-      if (micTimerInterval) {
-        clearInterval(micTimerInterval);
-        micTimerInterval = null;
-      }
-      document.getElementById('liveMicIndicator').style.display = 'none';
-      document.getElementById('micBtnText').textContent = 'Live Mic';
-      document.getElementById('btnLiveMic').style.background = '';
-    }
-
     async function extractTasks() {
       const text = document.getElementById('transcriptInput').value.trim();
       if (!text) {
-        ClubOps.toast('Please enter meeting text or import audio first', 'warn');
+        ClubOps.toast('Please enter meeting text first', 'warn');
         return;
       }
-
-      const selectedEventId = document.getElementById('eventSelect')?.value || 'felicific-2026';
 
       ClubOps.aiLoader.show([
         'Scanning conversation text for entity names...',
@@ -487,10 +115,7 @@ Arjun will test wireless handheld microphone channels today.`;
       ]);
 
       try {
-        const res = await ClubOps.api.post('/api/ai/meeting-to-tasks', {
-          transcript: text,
-          eventId: selectedEventId
-        });
+        const res = await ClubOps.api.post('/api/ai/meeting-to-tasks', { transcript: text, eventId: 'felicific-2026' });
         ClubOps.aiLoader.hide();
 
         if (res.success && res.tasks) {
@@ -500,7 +125,7 @@ Arjun will test wireless handheld microphone channels today.`;
 
           const container = document.getElementById('extractionResults');
           container.innerHTML = res.tasks.map(t => `
-            <div style="background:rgba(10,14,26,0.8); border:1px solid var(--border-strong); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <div class="extracted-task-row" style="background:rgba(10,14,26,0.8); border:1px solid var(--border-strong); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <strong style="font-size:13.5px; color:var(--text-0);">${ClubOps.escapeHtml(t.name || t.title)}</strong>
                 <div style="font-size:11.5px; color:var(--text-2); margin-top:4px;">
@@ -508,13 +133,35 @@ Arjun will test wireless handheld microphone channels today.`;
                   <span><i class="fa-solid fa-calendar"></i> ${ClubOps.escapeHtml(t.dueDate || t.deadline)}</span>
                 </div>
               </div>
-              <span class="badge ${t.priority === 'High' ? 'badge-red' : 'badge-cyan'}">${t.priority}</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="badge ${t.priority === 'High' ? 'badge-red' : 'badge-cyan'}">${t.priority}</span>
+                <button type="button" class="task-delete-btn" title="Delete Task" onclick="deleteExtractedTask('${t.id}', '${ClubOps.escapeHtml(t.name || t.title)}', this)">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
             </div>
           `).join('');
         }
       } catch (err) {
         ClubOps.aiLoader.hide();
         ClubOps.toast('Extraction failed: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteExtractedTask(id, title, btn) {
+      if (!confirm(`Delete task "${title}"?`)) return;
+      try {
+        await ClubOps.api.delete(`/api/tasks/${id}`);
+        ClubOps.toast('Task deleted from database', 'info');
+        const card = btn.closest('.extracted-task-row') || btn.parentElement.parentElement;
+        if (card) card.remove();
+        const remaining = document.querySelectorAll('.extracted-task-row').length;
+        const countBadge = document.getElementById('extractedCountBadge');
+        if (countBadge) {
+          countBadge.textContent = remaining > 0 ? `${remaining} Remaining` : 'All Cleared';
+        }
+      } catch (err) {
+        ClubOps.toast('Failed to delete task: ' + err.message, 'error');
       }
     }
   </script>

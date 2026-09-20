@@ -10,13 +10,17 @@ const PORT = process.env.PORT || 5000;
 // Enable CORS
 app.use(cors());
 
-// Parse JSON and urlencoded request bodies with 50mb limit for audio data
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Parse JSON request bodies
+app.use(express.json());
 
 // Serve static frontend files
 const frontendPath = path.join(__dirname, '..', 'frontend');
 app.use(express.static(frontendPath));
+
+// Route alias for URLs with spaces
+app.get(['/event planner.html', '/event%20planner.html'], (req, res) => {
+  res.sendFile(path.join(frontendPath, 'event-planner.html'));
+});
 
 // Healthcheck
 app.get('/api/health', (req, res) => {
@@ -56,15 +60,56 @@ app.use('/api/ai', aiRouter);
 initSchema().then(() => {
   return seedDatabase(false);
 }).then(() => {
-  app.listen(PORT, () => {
-    console.log(`=========================================`);
-    console.log(` ClubOps AI Backend Server Running! (SQLite)`);
-    console.log(` Port: http://localhost:${PORT}`);
-    console.log(` APIs: http://localhost:${PORT}/api/dashboard/summary`);
-    console.log(` Dashboard: http://localhost:${PORT}/dashboard.html`);
-    console.log(` Landing: http://localhost:${PORT}/index.html`);
-    console.log(`=========================================`);
-  });
+  function startServer() {
+    const server = app.listen(PORT, () => {
+      console.log(`=========================================`);
+      console.log(` ClubOps AI Backend Server Running! (SQLite)`);
+      console.log(` Port: http://localhost:${PORT}`);
+      console.log(` APIs: http://localhost:${PORT}/api/dashboard/summary`);
+      console.log(` Dashboard: http://localhost:${PORT}/dashboard.html`);
+      console.log(` Landing: http://localhost:${PORT}/index.html`);
+      console.log(`=========================================`);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`\n⚠️  Port ${PORT} is occupied by an older instance. Releasing port ${PORT} automatically...`);
+        try {
+          if (process.platform === 'win32') {
+            const out = require('child_process').execSync(`netstat -ano | findstr :${PORT}`, { encoding: 'utf8' });
+            const lines = out.trim().split('\n');
+            let killedAny = false;
+            for (const line of lines) {
+              const parts = line.trim().split(/\s+/);
+              const pid = parts[parts.length - 1]?.trim();
+              if (pid && pid !== '0' && pid !== process.pid.toString()) {
+                try {
+                  require('child_process').execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
+                  killedAny = true;
+                } catch (e) {}
+              }
+            }
+            if (killedAny) {
+              console.log(`✅ Freed port ${PORT}. Starting server now...`);
+            }
+          } else {
+            require('child_process').execSync(`fuser -k ${PORT}/tcp`, { stdio: 'ignore' });
+          }
+
+          setTimeout(() => {
+            startServer();
+          }, 800);
+        } catch (killErr) {
+          console.error(`\n⚠️  Port ${PORT} is already in use by another instance.`);
+          console.error(`👉 Close the previous terminal running on port ${PORT}, then run again.\n`);
+        }
+      } else {
+        console.error('Server error:', err);
+      }
+    });
+  }
+
+  startServer();
 }).catch(err => {
   console.error('Failed to initialize database on startup:', err);
 });

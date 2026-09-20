@@ -131,8 +131,76 @@ router.put('/:id', async (req, res) => {
 // DELETE /api/tasks/:id
 router.delete('/:id', async (req, res) => {
   try {
+    const task = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'Task not found' });
+    }
+
     await run('DELETE FROM tasks WHERE id = ?', [req.params.id]);
-    res.json({ success: true, message: 'Task deleted successfully' });
+
+    // Log deletion in activity feed
+    await run(`
+      INSERT INTO activity (id, eventId, text, time, dot, timestamp)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [`act-${Date.now()}`, task.eventId || 'felicific-2026', `Deleted task: <strong>${task.title}</strong>`, 'Just now', 'red', Date.now()]);
+
+    res.json({
+      success: true,
+      message: `Task "${task.title}" deleted successfully`,
+      deletedId: req.params.id,
+      task
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/tasks/delete-by-name - Delete task by name / title
+router.post('/delete-by-name', async (req, res) => {
+  try {
+    const { title, name, eventId } = req.body;
+    const searchTitle = (title || name || '').trim();
+    if (!searchTitle) {
+      return res.status(400).json({ success: false, message: 'Task title is required to delete' });
+    }
+
+    let sql = 'SELECT * FROM tasks WHERE LOWER(title) = LOWER(?)';
+    const params = [searchTitle];
+    if (eventId) {
+      sql += ' AND eventId = ?';
+      params.push(eventId);
+    }
+
+    let task = await get(sql, params);
+    if (!task) {
+      // Try partial match if exact match not found
+      let partialSql = 'SELECT * FROM tasks WHERE LOWER(title) LIKE LOWER(?)';
+      const partialParams = [`%${searchTitle}%`];
+      if (eventId) {
+        partialSql += ' AND eventId = ?';
+        partialParams.push(eventId);
+      }
+      task = await get(partialSql, partialParams);
+    }
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: `Task "${searchTitle}" not found` });
+    }
+
+    await run('DELETE FROM tasks WHERE id = ?', [task.id]);
+
+    // Log deletion in activity feed
+    await run(`
+      INSERT INTO activity (id, eventId, text, time, dot, timestamp)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [`act-${Date.now()}`, task.eventId || 'felicific-2026', `Deleted task: <strong>${task.title}</strong>`, 'Just now', 'red', Date.now()]);
+
+    res.json({
+      success: true,
+      message: `Task "${task.title}" deleted successfully`,
+      deletedId: task.id,
+      task
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

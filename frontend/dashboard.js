@@ -208,6 +208,9 @@ function renderTasks(tasks) {
           </div>
         </div>
         <span class="priority-pill ${pillClass}">${priorityLabel}</span>
+        <button type="button" class="task-delete-btn" title="Delete Task" onclick="deleteTaskRow('${task.id}', '${escapeHtml(task.name)}', event)">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
       </div>
     `;
   }).join('');
@@ -240,6 +243,36 @@ async function toggleTaskStatus(taskId, nextStatus) {
   } catch (err) {
     console.error('Error updating task:', err);
     alert('Unable to update task. Please ensure the backend is running on port 5000.');
+    loadDashboardData();
+  }
+}
+
+// Interactive Task Deletion
+async function deleteTaskRow(taskId, taskName, event) {
+  if (event) event.stopPropagation();
+  if (!confirm(`Are you sure you want to delete "${taskName || 'this task'}"?`)) return;
+
+  try {
+    const row = document.querySelector(`.task-row[data-task-id="${taskId}"]`);
+    if (row) {
+      row.style.opacity = '0.3';
+      row.style.pointerEvents = 'none';
+    }
+
+    const res = await fetch(`${API_BASE}/api/tasks/${taskId}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to delete task');
+    }
+
+    // Refresh dashboard data, recalculate statistics and reload activity feed
+    await loadDashboardData();
+
+  } catch (err) {
+    console.error('Error deleting task:', err);
+    alert('Unable to delete task. Please ensure the backend is running on port 5000.');
     loadDashboardData();
   }
 }

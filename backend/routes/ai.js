@@ -5,35 +5,6 @@ const gemini = require('../services/geminiService');
 
 const KNOWN_MEMBERS = ['Rahul', 'Vrunda', 'Helli', 'Arjun', 'Sneha', 'Pooja', 'Aman', 'Kavya', 'Amit', 'Ishita', 'Rohan', 'Priya', 'Kunal', 'Suresh'];
 
-// 0. POST /api/ai/transcribe-audio (Feature: Audio Import & Free AI STT)
-router.post('/transcribe-audio', async (req, res) => {
-  try {
-    const { audioData, mimeType = 'audio/mp3' } = req.body;
-
-    if (!audioData) {
-      return res.status(400).json({ success: false, message: 'Audio data is required for transcription' });
-    }
-
-    const cleanBase64 = audioData.replace(/^data:[^;]+;base64,/, '');
-    const transcript = await gemini.transcribeAudioWithGemini(cleanBase64, mimeType);
-
-    if (!transcript) {
-      return res.status(500).json({
-        success: false,
-        message: 'Could not transcribe audio with STT model. Please verify audio quality and retry.'
-      });
-    }
-
-    res.json({
-      success: true,
-      transcript,
-      message: 'Audio successfully transcribed into meeting text!'
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
 // 1. POST /api/ai/meeting-to-tasks (Feature 4)
 router.post('/meeting-to-tasks', async (req, res) => {
   try {

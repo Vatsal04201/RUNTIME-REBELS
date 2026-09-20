@@ -49,6 +49,39 @@
       width: 16px;
       height: 16px;
     }
+
+    /* Task row styling with delete button */
+    .task-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12.5px;
+      margin-top: 6px;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      color: var(--text-1);
+      transition: background 0.2s ease;
+    }
+    .task-item-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .task-delete-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      opacity: 0.7;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
+    .task-delete-btn:hover {
+      opacity: 1;
+      background: rgba(239, 68, 68, 0.15);
+    }
   </style>
 </head>
 <body data-page="events">
@@ -279,6 +312,48 @@
 
   <script src="shared.js"></script>
   <script>
+    // In-memory store for currently previewed or created tasks
+    let currentTasks = [];
+
+    function renderTasksListHtml(tasks) {
+      if (!tasks || tasks.length === 0) {
+        return '<div style="color:var(--text-2); font-size:12px; padding:10px 0;">No tasks remaining.</div>';
+      }
+      return tasks.map((t, index) => `
+        <div class="task-item-row" id="taskRow_${index}">
+          <div>
+            <span class="badge ${t.phase === 'Before Event' ? 'badge-blue' : (t.phase === 'Event Day' ? 'badge-green' : 'badge-purple')}">${t.phase}</span>
+            <strong style="margin-left: 4px;">${ClubOps.escapeHtml(t.title)}</strong>
+            <span style="color:var(--cyan); margin-left: 4px;">[${ClubOps.escapeHtml(t.owner)}]</span>
+            <span style="font-size:11px; color:var(--text-2); margin-left:4px;">(${t.deadline || 'Event Day'})</span>
+          </div>
+          <button type="button" class="task-delete-btn" title="Delete Task" onclick="deleteTaskItem(${index}, '${t.id || ''}')">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function deleteTaskItem(index, taskId) {
+      if (taskId) {
+        try {
+          await ClubOps.api.delete(`/api/tasks/${taskId}`);
+        } catch (err) {
+          console.warn('Could not delete from backend, removing locally:', err);
+        }
+      }
+      currentTasks.splice(index, 1);
+      const container = document.getElementById('taskListContainer');
+      if (container) {
+        container.innerHTML = renderTasksListHtml(currentTasks);
+      }
+      const countEl = document.getElementById('taskCountIndicator');
+      if (countEl) {
+        countEl.textContent = `${currentTasks.length} operational tasks`;
+      }
+      ClubOps.toast('Task removed', 'info');
+    }
+
     async function handleCreateEvent() {
       const name = document.getElementById('eventName').value.trim();
       const type = document.getElementById('eventType').value;
@@ -335,9 +410,6 @@
           status: 'Upcoming'
         });
 
-        // Also fetch AI starter plan
-        const planRes = await ClubOps.api.post('/api/ai/generate-plan', { eventName: name, type });
-
         ClubOps.aiLoader.hide();
         ClubOps.toast(`Event "${name}" created with Gemini AI lifecycle tasks!`, 'success');
 
@@ -354,22 +426,21 @@
         const headEl = document.getElementById('aiPlanStatusHead');
         if (headEl) headEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--green);"></i> ${ClubOps.escapeHtml(name)} Initialized with Gemini AI!`;
 
+        currentTasks = res.tasks || [];
+
         if (preview && planText) {
           preview.style.display = 'block';
-          const tasksList = res.tasks ? res.tasks.map(t => `<div style="font-size:12.5px; margin-top:6px; color:var(--text-1);"><span class="badge ${t.phase === 'Before Event' ? 'badge-blue' : (t.phase === 'Event Day' ? 'badge-green' : 'badge-purple')}">${t.phase}</span> <strong>${ClubOps.escapeHtml(t.title)}</strong> <span style="color:var(--cyan);">[${ClubOps.escapeHtml(t.owner)}]</span> <span style="font-size:11px; color:var(--text-2); margin-left:4px;">(${t.deadline || 'Event Day'})</span></div>`).join('') : '';
-
           planText.innerHTML = `
             <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;"><i class="fa-solid fa-brain"></i> ${ClubOps.escapeHtml(res.aiSummary || 'Gemini AI generated operational lifecycle plan')}</div>
             <div>• Registered <strong>${volunteers} volunteers</strong> with assigned leads: <strong>${photographyLead || 'Media Team'}</strong> (Photo), <strong>${soundLead || 'Audio Tech'}</strong> (Sound).</div>
             <div>• Created <strong>${services.length} vendor contracts</strong> (${services.join(', ')}).</div>
-            <div style="margin-top:6px; font-weight:600; color:var(--text-0);">• Gemini generated <strong>${res.tasksCount || 10} lifecycle tasks</strong> across Before, During, and After phases:</div>
-            <div style="margin-top:10px; max-height:240px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--border);">
-              ${tasksList}
+            <div style="margin-top:6px; font-weight:600; color:var(--text-0);">• Gemini generated <strong id="taskCountIndicator">${currentTasks.length} lifecycle tasks</strong> across Before, During, and After phases:</div>
+            <div id="taskListContainer" style="margin-top:10px; max-height:240px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--border);">
+              ${renderTasksListHtml(currentTasks)}
             </div>
           `;
         }
 
-        // Refresh upcoming events list
         loadUpcomingEventsList();
 
       } catch (err) {
@@ -418,17 +489,18 @@
           const planText = document.getElementById('aiPlanText');
           const headEl = document.getElementById('aiPlanStatusHead');
           if (headEl) headEl.innerHTML = `<i class="fa-solid fa-brain" style="color:var(--cyan);"></i> Gemini Preview: ${ClubOps.escapeHtml(name)}`;
+          
+          currentTasks = res.tasks;
+
           if (preview && planText) {
             preview.style.display = 'block';
-            const tasksList = res.tasks.map(t => `<div style="font-size:12.5px; margin-top:6px; color:var(--text-1);"><span class="badge ${t.phase === 'Before Event' ? 'badge-blue' : (t.phase === 'Event Day' ? 'badge-green' : 'badge-purple')}">${t.phase}</span> <strong>${ClubOps.escapeHtml(t.title)}</strong> <span style="color:var(--cyan);">[${ClubOps.escapeHtml(t.owner)}]</span> <span style="font-size:11px; color:var(--text-2); margin-left:4px;">(${t.deadline || 'Event Day'})</span></div>`).join('');
-
             planText.innerHTML = `
               <div style="font-weight:700; color:var(--cyan); margin-bottom:8px;">${ClubOps.escapeHtml(res.summary || 'Live Gemini AI Task Analysis')}</div>
-              <div style="margin-top:6px; font-weight:600; color:var(--text-0);">Generated ${res.tasks.length} Operational Tasks:</div>
-              <div style="margin-top:10px; max-height:260px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--border);">
-                ${tasksList}
+              <div style="margin-top:6px; font-weight:600; color:var(--text-0);">Generated <span id="taskCountIndicator">${currentTasks.length} Operational Tasks</span>:</div>
+              <div id="taskListContainer" style="margin-top:10px; max-height:260px; overflow-y:auto; padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid var(--border);">
+                ${renderTasksListHtml(currentTasks)}
               </div>
-              <div style="margin-top:10px; font-size:12px; color:var(--text-2);"><i class="fa-solid fa-circle-info"></i> Click "Create & Generate AI Plan" to save this event and all tasks into the database.</div>
+              <div style="margin-top:10px; font-size:12px; color:var(--text-2);"><i class="fa-solid fa-circle-info"></i> You can remove tasks above or click "Create & Generate AI Plan" to save this event.</div>
             `;
           }
         } else {

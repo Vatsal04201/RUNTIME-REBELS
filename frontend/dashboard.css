@@ -68,6 +68,26 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Remove all slide/scroll bars across the dashboard while maintaining smooth scrollability */
+html,
+body,
+.main,
+.sidebar,
+.side-nav,
+.app-shell,
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
@@ -160,6 +180,14 @@ body::after {
   gap: 4px;
   flex: 1;
   overflow-y: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.side-nav::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .nav-group-label {
@@ -283,6 +311,14 @@ body::after {
   padding: 32px 40px;
   background: transparent;
   overflow-y: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.main::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Topbar */

@@ -9,10 +9,14 @@ ClubOps AI is an intelligent event operations platform designed for college club
 
 ## 🚀 Quick Start: How to Run
 
+## BEFORE STEP 1 YOU NEED TO DOWNLOAD THE ZIP AND EXTRACT IT SOMEWHERE 
+## THEN FOLLOW THE STEPS AFTER OPENING ANY TERMINAL
+
 ### Step 1: Open Terminal in the project folder
 ```bash
 cd backend
 ```
+## YOUR LAPTOP MUST ALSO HAVE NODE JS FOR RUNNING THE FILE
 
 ### Step 2: Install dependencies (first time only)
 ```bash

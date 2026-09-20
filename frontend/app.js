@@ -417,26 +417,29 @@ function initLoginModal() {
     });
   }
 
-  if (form) {
-    form.addEventListener('submit', () => {
-      const emailInput = document.getElementById('collegeEmail');
-      const roleSelect = document.getElementById('collegeRole');
-      const email = emailInput ? emailInput.value.trim() : '';
-      const role = roleSelect ? roleSelect.value : 'operations';
-      const roleTitle = roleSelect && roleSelect.options[roleSelect.selectedIndex] ? roleSelect.options[roleSelect.selectedIndex].text : 'Club Organizer';
+  const handleLogin = (e) => {
+    if (e) e.preventDefault();
+    const emailInput = document.getElementById('collegeEmail');
+    const roleSelect = document.getElementById('collegeRole');
+    const email = emailInput && emailInput.value ? emailInput.value.trim() : 'lead@collegeclub.edu';
+    const role = roleSelect ? roleSelect.value : 'operations';
+    const roleTitle = roleSelect && roleSelect.options[roleSelect.selectedIndex] ? roleSelect.options[roleSelect.selectedIndex].text : 'Club Organizer';
 
-      // Save user session so dashboard can display proper role/name dynamically
-      localStorage.setItem('clubops_user', JSON.stringify({
-        email: email,
-        role: role,
-        roleTitle: roleTitle
-      }));
+    // Save user session so dashboard can display proper role/name dynamically
+    localStorage.setItem('clubops_user', JSON.stringify({
+      email: email,
+      role: role,
+      roleTitle: roleTitle
+    }));
 
-      closeModal();
-      showToast('Welcome to ClubOps AI', `Signed in as ${roleTitle} (${email}). Launching Dashboard...`, 'success');
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 600);
-    });
-  }
+    closeModal();
+    showToast('Welcome to ClubOps AI', `Signed in as ${roleTitle}. Launching Dashboard...`, 'success');
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 300);
+  };
+
+  if (form) form.addEventListener('submit', handleLogin);
+  const btnModalLogin = document.getElementById('btnModalLogin');
+  if (btnModalLogin) btnModalLogin.addEventListener('click', handleLogin);
 }

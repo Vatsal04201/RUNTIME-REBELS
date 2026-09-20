@@ -419,10 +419,21 @@ function initLoginModal() {
 
   if (form) {
     form.addEventListener('submit', () => {
-      const email = document.getElementById('collegeEmail').value;
-      const role = document.getElementById('collegeRole').value;
+      const emailInput = document.getElementById('collegeEmail');
+      const roleSelect = document.getElementById('collegeRole');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const role = roleSelect ? roleSelect.value : 'operations';
+      const roleTitle = roleSelect && roleSelect.options[roleSelect.selectedIndex] ? roleSelect.options[roleSelect.selectedIndex].text : 'Club Organizer';
+
+      // Save user session so dashboard can display proper role/name dynamically
+      localStorage.setItem('clubops_user', JSON.stringify({
+        email: email,
+        role: role,
+        roleTitle: roleTitle
+      }));
+
       closeModal();
-      showToast('Welcome to ClubOps AI', `Signed in as ${role.toUpperCase()} (${email}). Launching Dashboard...`, 'success');
+      showToast('Welcome to ClubOps AI', `Signed in as ${roleTitle} (${email}). Launching Dashboard...`, 'success');
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 600);

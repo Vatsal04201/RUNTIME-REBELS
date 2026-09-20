@@ -13,6 +13,7 @@ let searchIndex = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  initUserGreeting();
   loadDashboardData();
 
   // Quick action alerts
@@ -24,6 +25,59 @@ document.addEventListener('DOMContentLoaded', () => {
   // Poll for updates every 10 seconds
   setInterval(loadDashboardData, 10000);
 });
+
+// Dynamic Greeting & User Profile (Ensures no hardcoded default personal names)
+function initUserGreeting() {
+  const greetingEl = document.getElementById('topbarGreeting') || document.querySelector('.topbar-left .greeting');
+  const userNameEl = document.getElementById('userName') || document.querySelector('.user-card .user-name');
+  const userRoleEl = document.getElementById('userRole') || document.querySelector('.user-card .user-role');
+  const userAvatarEl = document.getElementById('userAvatar') || document.querySelector('.user-card .avatar');
+
+  const hour = new Date().getHours();
+  let timeGreeting = 'Good morning';
+  if (hour >= 12 && hour < 17) {
+    timeGreeting = 'Good afternoon';
+  } else if (hour >= 17 || hour < 4) {
+    timeGreeting = 'Good evening';
+  }
+
+  let displayName = 'Organizer';
+  let displayRole = 'Club Operations';
+  let avatarChar = 'O';
+
+  try {
+    const stored = localStorage.getItem('clubops_user');
+    if (stored) {
+      const user = JSON.parse(stored);
+      if (user.roleTitle) {
+        displayRole = user.roleTitle;
+      }
+      if (user.email) {
+        const prefix = user.email.split('@')[0];
+        if (prefix && prefix.length > 0) {
+          const cleanName = prefix.split(/[._-]/)[0];
+          displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+          avatarChar = displayName.charAt(0).toUpperCase();
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Could not parse stored user session:', e);
+  }
+
+  if (greetingEl) {
+    greetingEl.innerHTML = `${timeGreeting}, ${displayName} <span class="wave">👋</span>`;
+  }
+  if (userNameEl) {
+    userNameEl.textContent = displayName;
+  }
+  if (userRoleEl) {
+    userRoleEl.textContent = displayRole;
+  }
+  if (userAvatarEl) {
+    userAvatarEl.textContent = avatarChar;
+  }
+}
 
 // Main data loader
 async function loadDashboardData() {
@@ -377,7 +431,7 @@ function setupQuickActions() {
     chipSample.addEventListener('click', () => {
       const textarea = document.getElementById('meetingTranscriptInput');
       if (textarea) {
-        textarea.value = `Core Committee Meeting (18 Sep):\n- Rahul will inspect Stage 2 sound system today.\n- Vrunda to confirm photographer booking on Friday.\n- Helli needs to print 50 certificates tomorrow.\n- Pooja to coordinate backup generator fuel check ASAP.`;
+        textarea.value = `Core Committee Meeting (18 Sep):\n- Rahul will inspect Stage 2 sound system today.\n- Vrunda to confirm photographer booking on Friday.\n- Operations team to print 50 certificates tomorrow.\n- Pooja to coordinate backup generator fuel check ASAP.`;
       }
     });
   }

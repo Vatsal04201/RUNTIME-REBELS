@@ -71,17 +71,17 @@ const seedDatabase = async (force = false) => {
     // Pending (Today / Critical)
     { id: 't-1', title: 'Confirm photographer booking for stage 2', owner: 'Vrunda Patel', priority: 'Medium', deadline: 'Today', phase: 'Before Event', status: 'Pending' },
     { id: 't-2', title: 'Arrange backup microphone & UHF receiver', owner: 'Rahul Sharma', priority: 'High', deadline: 'Today', phase: 'Before Event', status: 'Pending' },
-    { id: 't-3', title: 'Print 50 participation & winner certificates', owner: 'Helli Mehta', priority: 'Medium', deadline: 'Tomorrow', phase: 'Before Event', status: 'Pending' },
+    { id: 't-3', title: 'Print 50 participation & winner certificates', owner: 'Operations Lead', priority: 'Medium', deadline: 'Tomorrow', phase: 'Before Event', status: 'Pending' },
     { id: 't-4', title: 'Assign 2 stage management volunteers', owner: 'Unassigned', priority: 'High', deadline: 'Tomorrow', phase: 'Before Event', status: 'Pending' },
-    { id: 't-5', title: 'Final volunteer briefing and walkie-talkie distribution', owner: 'Helli Mehta', priority: 'High', deadline: '24 Sep', phase: 'Before Event', status: 'Pending' },
+    { id: 't-5', title: 'Final volunteer briefing and walkie-talkie distribution', owner: 'Operations Lead', priority: 'High', deadline: '24 Sep', phase: 'Before Event', status: 'Pending' },
 
     // Completed Before Event
-    { id: 't-6', title: 'Book Main Auditorium with Dean Student Affairs', owner: 'Helli Mehta', priority: 'High', deadline: '10 Sep', phase: 'Before Event', status: 'Completed' },
-    { id: 't-7', title: 'Submit event proposal & budget sanctioned by Faculty Advisor', owner: 'Helli Mehta', priority: 'High', deadline: '12 Sep', phase: 'Before Event', status: 'Completed' },
+    { id: 't-6', title: 'Book Main Auditorium with Dean Student Affairs', owner: 'Operations Lead', priority: 'High', deadline: '10 Sep', phase: 'Before Event', status: 'Completed' },
+    { id: 't-7', title: 'Submit event proposal & budget sanctioned by Faculty Advisor', owner: 'Operations Lead', priority: 'High', deadline: '12 Sep', phase: 'Before Event', status: 'Completed' },
     { id: 't-8', title: 'Design event posters & banners for campus display', owner: 'Arjun Nair', priority: 'Medium', deadline: '14 Sep', phase: 'Before Event', status: 'Completed' },
     { id: 't-9', title: 'Deploy online attendee registration form', owner: 'Amit Shah', priority: 'Medium', deadline: '15 Sep', phase: 'Before Event', status: 'Completed' },
     { id: 't-10', title: 'Select anchor duo for inauguration ceremony', owner: 'Kavya Trivedi', priority: 'Low', deadline: '15 Sep', phase: 'Before Event', status: 'Completed' },
-    { id: 't-11', title: 'Confirm Chief Guest Prof. S. K. Joshi attendance', owner: 'Helli Mehta', priority: 'High', deadline: '16 Sep', phase: 'Before Event', status: 'Completed' },
+    { id: 't-11', title: 'Confirm Chief Guest Prof. S. K. Joshi attendance', owner: 'Operations Lead', priority: 'High', deadline: '16 Sep', phase: 'Before Event', status: 'Completed' },
     { id: 't-12', title: 'Finalize stage decoration & Royal Blue backdrop design', owner: 'Pooja Trivedi', priority: 'Medium', deadline: '16 Sep', phase: 'Before Event', status: 'Completed' },
     { id: 't-13', title: 'Distribute campus security notification letter', owner: 'Rahul Sharma', priority: 'High', deadline: '17 Sep', phase: 'Before Event', status: 'Completed' },
     { id: 't-14', title: 'Set up sound mixer & PA monitor line contract', owner: 'Rahul Sharma', priority: 'High', deadline: '17 Sep', phase: 'Before Event', status: 'Completed' },
@@ -89,14 +89,14 @@ const seedDatabase = async (force = false) => {
 
     // Event Day Tasks
     { id: 't-16', title: 'Main gate QR check-in & delegate kit handover', owner: 'Vrunda Patel', priority: 'High', deadline: 'Event Day', phase: 'Event Day', status: 'Completed' },
-    { id: 't-17', title: 'Chief Guest reception & escort to VIP lounge', owner: 'Helli Mehta', priority: 'High', deadline: 'Event Day', phase: 'Event Day', status: 'Completed' },
+    { id: 't-17', title: 'Chief Guest reception & escort to VIP lounge', owner: 'Operations Lead', priority: 'High', deadline: 'Event Day', phase: 'Event Day', status: 'Completed' },
     { id: 't-18', title: 'Audio line level check & podium microphone test', owner: 'Rahul Sharma', priority: 'High', deadline: 'Event Day', phase: 'Event Day', status: 'Completed' },
     { id: 't-19', title: 'Lighting sequence test & stage spot control', owner: 'Dev Malhotra', priority: 'Medium', deadline: 'Event Day', phase: 'Event Day', status: 'Completed' },
 
     // After Event Tasks
     { id: 't-20', title: 'Collect participant feedback & satisfaction score', owner: 'Amit Shah', priority: 'Low', deadline: '26 Sep', phase: 'After Event', status: 'Completed' },
     { id: 't-21', title: 'Auditorium premise clean-up and handover sign-off', owner: 'Priya Singh', priority: 'High', deadline: '26 Sep', phase: 'After Event', status: 'Completed' },
-    { id: 't-22', title: 'Vendor invoices & final accounts settlement', owner: 'Helli Mehta', priority: 'High', deadline: '27 Sep', phase: 'After Event', status: 'Completed' }
+    { id: 't-22', title: 'Vendor invoices & final accounts settlement', owner: 'Operations Lead', priority: 'High', deadline: '27 Sep', phase: 'After Event', status: 'Completed' }
   ];
 
   for (const t of tasks) {
@@ -110,7 +110,7 @@ const seedDatabase = async (force = false) => {
   const volunteers = [
     { id: 'v-1', name: 'Rahul Sharma', role: 'Stage Tech Lead', team: 'Stage Management', contact: '+91 98765 11001', tasks: 4, status: 'Assigned', checkedIn: 1, checkInTime: '08:45 AM' },
     { id: 'v-2', name: 'Vrunda Patel', role: 'Photography Lead', team: 'Photography', contact: '+91 98765 11002', tasks: 3, status: 'Assigned', checkedIn: 1, checkInTime: '08:50 AM' },
-    { id: 'v-3', name: 'Helli Mehta', role: 'Operations & Event Lead', team: 'Registration', contact: '+91 98765 11003', tasks: 5, status: 'Assigned', checkedIn: 1, checkInTime: '08:30 AM' },
+    { id: 'v-3', name: 'Operations Lead', role: 'Operations & Event Lead', team: 'Registration', contact: '+91 98765 11003', tasks: 5, status: 'Assigned', checkedIn: 1, checkInTime: '08:30 AM' },
     { id: 'v-4', name: 'Arjun Nair', role: 'Audio-Visual Tech', team: 'Technical', contact: '+91 98765 11004', tasks: 2, status: 'Assigned', checkedIn: 0, checkInTime: null },
     { id: 'v-5', name: 'Sneha Rao', role: 'VIP Hospitality', team: 'Hospitality', contact: '+91 98765 11005', tasks: 3, status: 'Assigned', checkedIn: 1, checkInTime: '09:05 AM' },
     { id: 'v-6', name: 'Pooja Trivedi', role: 'Decoration Supervisor', team: 'Logistics', contact: '+91 98765 11006', tasks: 3, status: 'Assigned', checkedIn: 1, checkInTime: '09:00 AM' },
@@ -192,7 +192,7 @@ const seedDatabase = async (force = false) => {
     { id: 'act-1', text: '<strong>Vrunda Patel</strong> updated task <em>Confirm photographer booking</em>', time: '12m ago', dot: 'cyan', timestamp: Date.now() - 12 * 60000 },
     { id: 'act-2', text: '<strong>ClubOps AI</strong> detected potential risk: <em>Sound vendor stage 2 not confirmed</em>', time: '18m ago', dot: 'red', timestamp: Date.now() - 18 * 60000 },
     { id: 'act-3', text: '<strong>Rahul Sharma</strong> marked <em>Sound setup contract</em> as completed', time: '35m ago', dot: 'green', timestamp: Date.now() - 35 * 60000 },
-    { id: 'act-4', text: '<strong>Helli Mehta</strong> approved budget for <em>GlowLights Pro lighting</em>', time: '1h ago', dot: 'purple', timestamp: Date.now() - 60 * 60000 },
+    { id: 'act-4', text: '<strong>Operations Lead</strong> approved budget for <em>GlowLights Pro lighting</em>', time: '1h ago', dot: 'purple', timestamp: Date.now() - 60 * 60000 },
     { id: 'act-5', text: '<strong>ClubOps AI</strong> generated What-If contingency protocol for <em>Heavy Rain Relocation</em>', time: '2h ago', dot: 'cyan', timestamp: Date.now() - 120 * 60000 }
   ];
 

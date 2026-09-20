@@ -3,7 +3,7 @@ const router = express.Router();
 const { run, get, all } = require('../database/database');
 const gemini = require('../services/geminiService');
 
-const KNOWN_MEMBERS = ['Rahul', 'Vrunda', 'Helli', 'Arjun', 'Sneha', 'Pooja', 'Aman', 'Kavya', 'Amit', 'Ishita', 'Rohan', 'Priya', 'Kunal', 'Suresh'];
+const KNOWN_MEMBERS = ['Rahul', 'Vrunda', 'Arjun', 'Sneha', 'Pooja', 'Aman', 'Kavya', 'Amit', 'Ishita', 'Rohan', 'Priya', 'Kunal', 'Suresh'];
 
 // 0. POST /api/ai/transcribe-audio (Feature: Audio Import & Free AI STT)
 router.post('/transcribe-audio', async (req, res) => {
@@ -92,7 +92,7 @@ router.post('/meeting-to-tasks', async (req, res) => {
       extracted.push({
         id: `t-ai-${Date.now()}-1`,
         title: 'Review committee meeting action items and finalize schedule',
-        owner: 'Helli Mehta',
+        owner: 'Operations Lead',
         priority: 'High',
         deadline: 'Today',
         phase: 'Before Event',
@@ -331,7 +331,7 @@ SAFETY & ADMINISTRATIVE UNDERTAKINGS:
 We kindly request approval to proceed with campus infrastructure and electrical department support.
 
 Sincerely,
-Student Event Convener: Helli Mehta
+Student Event Convener: Operations Lead
 Faculty Advisor Sign-off: Prof. S. K. Joshi`;
 
       return res.json({ success: true, type, title: `Official Dean Permission Letter — ${event.name}`, content: letter });

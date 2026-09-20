@@ -91,11 +91,11 @@
           <span>Settings</span>
         </a>
 
-        <div class="user-card">
-          <div class="avatar">H</div>
+        <div class="user-card" id="userCard">
+          <div class="avatar" id="userAvatar">O</div>
           <div class="user-info">
-            <div class="user-name">Helli</div>
-            <div class="user-role">Club Organizer</div>
+            <div class="user-name" id="userName">Organizer</div>
+            <div class="user-role" id="userRole">Club Operations</div>
           </div>
         </div>
       </div>
@@ -105,8 +105,8 @@
 
       <header class="topbar">
         <div class="topbar-left">
-          <h1 class="greeting">
-            Good morning, Helli <span class="wave">👋</span>
+          <h1 class="greeting" id="topbarGreeting">
+            Good morning, Organizer <span class="wave">👋</span>
           </h1>
 
           <p class="greeting-sub">
@@ -504,7 +504,7 @@
         <textarea id="meetingTranscriptInput" class="meeting-textarea" rows="5" placeholder="Example:
 Rahul will check Stage 2 sound system today.
 Vrunda to confirm photographer booking on Friday.
-Helli needs to print 50 certificates tomorrow."></textarea>
+Operations team to print 50 certificates tomorrow."></textarea>
 
         <div id="aiExtractionResults" class="ai-extracted-results" style="display: none;"></div>
 
@@ -595,7 +595,7 @@ Helli needs to print 50 certificates tomorrow."></textarea>
                 <span class="slot-hour">10:30 AM</span>
                 <div class="slot-card active">
                   <strong>Inauguration Ceremony & Keynote</strong>
-                  <span>Auditorium • Lead: Helli • LIVE NOW</span>
+                  <span>Auditorium • Lead: Stage Team • LIVE NOW</span>
                 </div>
               </div>
               <div class="day-time-slot pending">

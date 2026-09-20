@@ -255,7 +255,7 @@ Return STRICTLY a JSON object:
 async function transcribeAudioWithGemini(audioBase64, mimeType = 'audio/mp3') {
   const prompt = `You are an expert speech-to-text audio transcription engine for university club operations.
 Transcribe this audio recording accurately word-for-word into clear, readable meeting notes.
-Preserve entity names, student names (e.g. Rahul, Vrunda, Helli, Sneha, Pooja, Arjun, Amit, Kunal, Ishita), deadlines, equipment names, and operational action items.
+Preserve entity names, student names (e.g. Rahul, Vrunda, Sneha, Pooja, Arjun, Amit, Kunal, Ishita), deadlines, equipment names, and operational action items.
 Return ONLY the clean transcript text without preamble or markdown quotation blocks.`;
 
   for (const model of MODELS) {

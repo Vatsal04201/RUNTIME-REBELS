@@ -22,7 +22,7 @@
   {
     "id": "task-3",
     "name": "Print permission certificates",
-    "assignee": "Helli",
+    "assignee": "Operations Lead",
     "status": "pending",
     "priority": "medium",
     "dueDate": "Tomorrow",
@@ -61,7 +61,7 @@
   {
     "id": "task-7",
     "name": "Book main auditorium with Dean office",
-    "assignee": "Helli",
+    "assignee": "Operations Lead",
     "status": "completed",
     "priority": "high",
     "dueDate": "Sep 12",
@@ -97,7 +97,7 @@
   {
     "id": "task-11",
     "name": "Procure stage badges and lanyards",
-    "assignee": "Helli",
+    "assignee": "Operations Lead",
     "status": "completed",
     "priority": "low",
     "dueDate": "Sep 16",
@@ -196,7 +196,7 @@
   {
     "id": "task-22",
     "name": "Generate final attendee name badges",
-    "assignee": "Helli",
+    "assignee": "Operations Lead",
     "status": "pending",
     "priority": "medium",
     "dueDate": "Sep 22",

@@ -176,16 +176,16 @@
             <textarea id="transcriptInput" rows="9" placeholder="Example:
 Rahul will inspect Stage 2 sound system today.
 Vrunda to confirm photographer booking on Friday.
-Helli needs to print 50 certificates tomorrow.
+Operations team to print 50 certificates tomorrow.
 Pooja to coordinate backup generator fuel check ASAP.">Rahul will inspect the Stage 2 sound system today.
 Vrunda to confirm photographer booking by Friday.
-Helli needs to print 50 certificates tomorrow.
+Operations team to print 50 certificates tomorrow.
 Pooja must coordinate backup generator fuel check ASAP.
 Arjun will test wireless microphone frequencies today.</textarea>
           </div>
 
           <div style="margin-top: 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div style="font-size:12px; color:var(--text-2);"><i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Auto-detects Rahul, Vrunda, Helli, Pooja, etc.</div>
+            <div style="font-size:12px; color:var(--text-2);"><i class="fa-solid fa-bolt" style="color:var(--cyan);"></i> Auto-detects team members, roles, deadlines, etc.</div>
             <button class="btn btn-primary" id="btnExtract" onclick="extractTasks()">
               <i class="fa-solid fa-wand-magic-sparkles"></i> Extract & Save to Database
             </button>
@@ -240,7 +240,7 @@ Arjun will test wireless microphone frequencies today.</textarea>
     function loadSample(n) {
       const textarea = document.getElementById('transcriptInput');
       if (n === 1) {
-        textarea.value = `Rahul will inspect Stage 2 sound system today.\nVrunda to confirm photographer booking on Friday.\nHelli needs to print 50 certificates tomorrow.\nPooja must coordinate backup generator fuel check ASAP.\nArjun will test wireless microphone frequencies today.`;
+        textarea.value = `Rahul will inspect Stage 2 sound system today.\nVrunda to confirm photographer booking on Friday.\nOperations team to print 50 certificates tomorrow.\nPooja must coordinate backup generator fuel check ASAP.\nArjun will test wireless microphone frequencies today.`;
       } else {
         textarea.value = `Sneha will coordinate high-tea snacks with Spice Route catering today.\nIshita to escort faculty advisor Prof. Joshi to the green room on Friday.\nAman to set up the registration QR scanners by 4 PM.\nKunal needs to check first-aid kit supplies immediately.`;
       }
@@ -364,7 +364,7 @@ Arjun will test wireless microphone frequencies today.</textarea>
 
     function fallbackAudioTranscription() {
       // Robust client simulation fallback in case backend is reloading or free quota hit
-      const simulatedNotes = `Rahul will inspect Stage 2 sound system today.\nVrunda to confirm photographer booking on Friday.\nHelli needs to print 50 certificates tomorrow.\nPooja must coordinate backup generator fuel check ASAP.\nArjun will test wireless microphone frequencies today.`;
+      const simulatedNotes = `Rahul will inspect Stage 2 sound system today.\nVrunda to confirm photographer booking on Friday.\nOperations team to print 50 certificates tomorrow.\nPooja must coordinate backup generator fuel check ASAP.\nArjun will test wireless microphone frequencies today.`;
       const textarea = document.getElementById('transcriptInput');
       textarea.value = simulatedNotes;
       textarea.classList.add('pulse-highlight');
@@ -376,7 +376,7 @@ Arjun will test wireless microphone frequencies today.</textarea>
     function loadSampleAudioDemo() {
       const demoTranscript = `Rahul will verify auditorium Stage 2 lighting and sound console today.
 Vrunda to confirm catering package with Spice Route vendor by Friday.
-Helli needs to print 100 VIP parking passes tomorrow morning.
+Transport team to print 100 VIP parking passes tomorrow morning.
 Pooja must coordinate backup diesel generator check ASAP.
 Arjun will test wireless handheld microphone channels today.`;
       

@@ -61,6 +61,5 @@ Runtime-Rebels/
 │   ├── dataStore.js      # Data access layer & dynamic readiness engine
 │   ├── routes/           # REST endpoints (events, tasks, risks, ai, etc.)
 │   └── data/             # Persistent JSON seed files
-└── vatsal/               # Complete project copy for hackathon evaluation
 ```
 

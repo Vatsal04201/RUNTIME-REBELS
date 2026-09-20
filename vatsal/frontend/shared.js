@@ -7,7 +7,7 @@
 (function (global) {
   'use strict';
 
-  const API_BASE = window.location.port === '5000' ? '' : 'http://localhost:5000';
+  const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
 
   /* ============================================================
      1. NAVIGATION MAP

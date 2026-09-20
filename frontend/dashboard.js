@@ -3,8 +3,7 @@
    Connects to Backend REST APIs & Powers Dynamic UI
    ========================================================= */
 
-// Auto-detect API base (works whether served from backend on :5000 or frontend on :3000)
-const API_BASE = window.location.port === '5000' ? '' : 'http://localhost:5000';
+const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
 
 let searchIndex = {
   events: [],

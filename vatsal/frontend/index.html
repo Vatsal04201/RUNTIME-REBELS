@@ -42,7 +42,7 @@
         <a href="dashboard.html" class="nav-link badge-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
       </nav>
       <div class="nav-actions">
-        <button class="login-link" id="loginBtn">Log in</button>
+        <button class="login-link" id="loginBtn" onclick="const m=document.getElementById('loginModal');if(m){m.classList.add('active','open','show');m.style.display='flex';}">Log in</button>
         <a href="dashboard.html" class="btn-primary btn-sm">Launch Dashboard <i class="fa-solid fa-arrow-right"></i></a>
       </div>
       <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
     <a href="#event-day" class="mobile-nav-link">Event Day</a>
     <a href="dashboard.html" class="mobile-nav-link" style="color: var(--accent-cyan); font-weight: 700;"><i class="fa-solid fa-chart-line"></i> Live Dashboard</a>
     <div class="mobile-actions">
-      <button class="btn-secondary w-full" id="mobileLoginBtn">Log in</button>
+      <button class="btn-secondary w-full" id="mobileLoginBtn" onclick="const m=document.getElementById('loginModal');if(m){m.classList.add('active','open','show');m.style.display='flex';}">Log in</button>
       <a href="dashboard.html" class="btn-primary w-full">Launch Dashboard <i class="fa-solid fa-arrow-right"></i></a>
     </div>
   </div>
@@ -770,20 +770,20 @@
   </footer>
 
   <!-- Login Modal -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="modal-card glass-panel">
-      <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-overlay" id="loginModal" onclick="if(event.target===this){this.classList.remove('active','open','show');this.style.display='none';}">
+    <div class="modal-card glass-panel" onclick="event.stopPropagation();">
+      <button class="modal-close" id="modalClose" onclick="const m=document.getElementById('loginModal');if(m){m.classList.remove('active','open','show');m.style.display='none';}"><i class="fa-solid fa-xmark"></i></button>
       <div class="modal-header">
         <div class="logo-icon modal-icon"><i class="fa-solid fa-cube"></i></div>
         <h3>Welcome to ClubOps AI</h3>
         <p>Access your college club operational workspace</p>
       </div>
-      <form class="modal-form" id="loginForm">
+      <form class="modal-form" id="loginForm" onsubmit="event.preventDefault(); window.location.href='dashboard.html';">
         <div class="form-group">
           <label for="collegeEmail">College / Club Email</label>
           <div class="input-wrap">
             <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="collegeEmail" placeholder="lead@collegeclub.edu" required>
+            <input type="email" id="collegeEmail" placeholder="lead@collegeclub.edu" value="lead@collegeclub.edu" required>
           </div>
         </div>
         <div class="form-group">
@@ -798,7 +798,7 @@
             </select>
           </div>
         </div>
-        <button type="submit" class="btn-primary w-full btn-lg" id="btnModalLogin">
+        <button type="submit" class="btn-primary w-full btn-lg" id="btnModalLogin" onclick="window.location.href='dashboard.html';">
           <span>Enter Workspace</span>
           <i class="fa-solid fa-arrow-right"></i>
         </button>

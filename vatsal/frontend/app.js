@@ -399,12 +399,24 @@ function initLoginModal() {
   const btnClose = document.getElementById('modalClose');
   const form = document.getElementById('loginForm');
 
-  function openModal() {
-    if (modal) modal.classList.add('open');
+  function openModal(e) {
+    if (e) e.preventDefault();
+    if (modal) {
+      modal.classList.add('open');
+      modal.classList.add('active');
+      modal.classList.add('show');
+      modal.style.display = 'flex';
+    }
   }
 
-  function closeModal() {
-    if (modal) modal.classList.remove('open');
+  function closeModal(e) {
+    if (e) e.preventDefault();
+    if (modal) {
+      modal.classList.remove('open');
+      modal.classList.remove('active');
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+    }
   }
 
   if (btnOpen) btnOpen.addEventListener('click', openModal);

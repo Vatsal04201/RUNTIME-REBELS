@@ -6,59 +6,80 @@
 
 /* --- CSS Variables / Design Tokens --- */
 :root {
-  --bg-primary: #F8FAFC;
-  --bg-secondary: #F1F5F9;
+  /* BACKGROUNDS */
+  --bg-primary: #F6F8FC;
+  --bg-secondary: #EEF2F8;
+  --bg-soft-blue: #F3F6FF;
 
+  /* CARDS */
+  --card: #FFFFFF;
+  --card-hover: #FCFDFF;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #FBFDFF;
+  --bg-card-hover: #FCFDFF;
 
+  /* BRAND */
   --primary: #3157D5;
+  --primary-dark: #243FA8;
   --primary-hover: #2648BE;
   --primary-light: #EEF2FF;
 
-  --success: #16845B;
+  /* GRADIENT */
+  --gradient-primary: linear-gradient(135deg, #3157D5 0%, #6366F1 100%);
+  --gradient-hover: linear-gradient(135deg, #2648BE 0%, #5548E8 100%);
+  --gradient-brand: linear-gradient(135deg, #3157D5 0%, #6366F1 100%);
+
+  /* SECONDARY ACCENT */
+  --accent-purple: #6366F1;
+  --accent-blue: #4F7CFF;
+
+  /* STATUS */
+  --success: #159A68;
+  --success-bg: #EAF8F1;
   --success-light: #EAF8F1;
 
-  --warning: #B77900;
-  --warning-light: #FFF6DD;
+  --warning: #C88700;
+  --warning-bg: #FFF5D9;
+  --warning-light: #FFF5D9;
 
-  --danger: #C83C3C;
+  --danger: #D14343;
+  --danger-bg: #FDECEC;
   --danger-light: #FDECEC;
 
   --info: #3157D5;
   --info-light: #EEF2FF;
 
+  /* TEXT */
   --text-primary: #172033;
   --text-secondary: #5F6B7A;
   --text-muted: #8A95A5;
   --text-dim: #94A3B8;
 
-  --border: #E2E8F0;
-  --border-light: #EDF1F5;
+  /* BORDERS */
+  --border: #E1E7F0;
+  --border-light: #EDF1F6;
+  --border-subtle: #E1E7F0;
+  --border-medium: #CBD5E1;
+  --border-focus: rgba(49, 87, 213, 0.4);
+  --border-glow: transparent;
 
-  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.07);
-  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.09);
+  /* SHADOWS */
+  --shadow-sm: 0 3px 10px rgba(31, 45, 70, 0.05);
+  --shadow-md: 0 10px 30px rgba(31, 45, 70, 0.08);
+  --shadow-lg: 0 18px 45px rgba(49, 87, 213, 0.12);
 
   /* Legacy aliases mapped to Light tokens */
   --bg-main: var(--bg-primary);
   --bg-surface: var(--bg-secondary);
   --bg-surface-elevated: #FFFFFF;
-  --border-subtle: var(--border);
-  --border-medium: #CBD5E1;
-  --border-focus: rgba(49, 87, 213, 0.4);
-  --border-glow: transparent;
 
   --accent-cyan: #0284C7;
   --accent-cyan-glow: transparent;
   --accent-indigo: #3157D5;
-  --accent-purple: #6366F1;
-  --accent-emerald: #16845B;
+  --accent-emerald: #159A68;
   --accent-emerald-glow: transparent;
-  --accent-amber: #B77900;
-  --accent-rose: #C83C3C;
+  --accent-amber: #C88700;
+  --accent-rose: #D14343;
 
-  --gradient-brand: linear-gradient(180deg, #3157D5 0%, #2648BE 100%);
   --gradient-brand-subtle: var(--primary-light);
   --gradient-text: #172033;
   --gradient-glow: transparent;
@@ -72,7 +93,7 @@
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -113,6 +134,10 @@ body,
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.07), transparent 28%),
+    radial-gradient(circle at 90% 20%, rgba(49, 87, 213, 0.06), transparent 25%);
+  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
   position: relative;
@@ -149,10 +174,10 @@ body::after,
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--primary);
-  background: var(--primary-light);
+  background: var(--bg-soft-blue);
   padding: 5px 14px;
   border-radius: var(--radius-full);
-  border: 1px solid #DCE4FF;
+  border: 1px solid rgba(49, 87, 213, 0.18);
   margin-bottom: 16px;
 }
 
@@ -180,19 +205,20 @@ body::after,
 /* Clean White SaaS Cards */
 .glass-panel,
 .glass-card {
-  background: var(--bg-card);
+  background: #FFFFFF;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 16px;
   padding: 32px;
-  transition: all var(--transition-normal);
+  transition: all 0.2s ease;
   position: relative;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 10px rgba(31, 45, 70, 0.05);
 }
 
 .glass-card:hover {
   background: var(--bg-card-hover);
-  border-color: #CBD5E1;
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: rgba(49, 87, 213, 0.18);
+  box-shadow: 0 12px 30px rgba(49, 87, 213, 0.10);
 }
 
 /* Buttons */
@@ -201,21 +227,28 @@ body::after,
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--primary);
+  background: linear-gradient(135deg, #3157D5 0%, #6366F1 100%);
   color: #FFFFFF;
   font-family: var(--font-heading);
   font-weight: 600;
-  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 10px;
   text-decoration: none;
-  border: none;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  box-shadow:
+    0 5px 14px rgba(49, 87, 213, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
   position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: linear-gradient(135deg, #2648BE 0%, #5548E8 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 20px rgba(49, 87, 213, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
   color: #FFFFFF;
 }
 
@@ -228,18 +261,20 @@ body::after,
   color: var(--text-primary);
   font-family: var(--font-heading);
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: 10px;
   text-decoration: none;
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
-  background: var(--bg-primary);
-  border-color: #CBD5E1;
-  color: var(--text-primary);
+  background: var(--bg-soft-blue);
+  border-color: rgba(49, 87, 213, 0.25);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(49, 87, 213, 0.08);
 }
 
 .btn-sm {
@@ -441,7 +476,10 @@ body::after,
   display: flex;
   align-items: center;
   z-index: 1;
-  background: var(--bg-primary);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.07), transparent 28%),
+    radial-gradient(circle at 90% 20%, rgba(49, 87, 213, 0.06), transparent 25%),
+    transparent;
 }
 
 .hero-bg-grid {

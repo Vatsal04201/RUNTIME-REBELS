@@ -334,6 +334,7 @@
     const select = document.getElementById(selectId);
     if (!select) return;
     try {
+      select.style.colorScheme = 'dark';
       const res = await api.get('/api/events');
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
         select.innerHTML = '';
@@ -348,6 +349,8 @@
           const opt = document.createElement('option');
           opt.value = ev.id;
           opt.textContent = `${ev.name} (${ev.date || 'TBD'})`;
+          opt.style.backgroundColor = '#0b1120';
+          opt.style.color = '#f8fafc';
           if (ev.id === currentId) opt.selected = true;
           select.appendChild(opt);
         });
@@ -364,6 +367,12 @@
         if (typeof onSelectCallback === 'function') {
           const selectedEvent = res.data.find(ev => ev.id === currentId);
           onSelectCallback(currentId, selectedEvent);
+        }
+      } else {
+        select.innerHTML = '<option value="" style="background-color:#0b1120; color:#94a3b8;">No events available</option>';
+        setActiveEventId('');
+        if (typeof onSelectCallback === 'function') {
+          onSelectCallback('', null);
         }
       }
     } catch (e) {
@@ -388,6 +397,22 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     renderSidebar();
+
+    // Global Shortcut: Ctrl + Shift + A to re-sync, test health and reload operational data
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        toast('⚡ Ctrl+Shift+A: Connecting to operations server...', 'info');
+        api.get('/api/health').then(h => {
+          toast(`⚡ Server Live: ${h.service}`, 'success');
+          if (typeof loadDashboardData === 'function') loadDashboardData();
+          if (typeof loadPlannerTasks === 'function' && typeof currentEventId !== 'undefined') loadPlannerTasks(currentEventId);
+        }).catch(err => {
+          toast('⚠️ Server unreachable: ' + err.message, 'error');
+        });
+      }
+    });
   });
 
 })(window);
+

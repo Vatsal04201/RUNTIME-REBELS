@@ -7,27 +7,28 @@
   <link rel="stylesheet" href="shared.css">
   <style>
     .risk-banner {
-      background: rgba(10, 14, 26, 0.7);
-      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 18px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
+      box-shadow: var(--shadow-sm);
       transition: all 0.2s;
     }
     .risk-banner.high {
-      border-left: 5px solid var(--red);
-      background: linear-gradient(90deg, rgba(239, 68, 68, 0.08), transparent);
+      border-left: 5px solid var(--danger);
+      background: var(--danger-light);
     }
     .risk-banner.medium {
-      border-left: 5px solid var(--amber);
-      background: linear-gradient(90deg, rgba(245, 158, 11, 0.08), transparent);
+      border-left: 5px solid var(--warning);
+      background: var(--warning-light);
     }
     .risk-banner.low {
-      border-left: 5px solid var(--cyan);
-      background: linear-gradient(90deg, rgba(34, 211, 238, 0.08), transparent);
+      border-left: 5px solid var(--primary);
+      background: var(--primary-light);
     }
     .radar-sweep {
       width: 140px;

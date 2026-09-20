@@ -36,16 +36,16 @@
       font-size: 10.5px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #60a5fa;
+      color: var(--primary);
       font-weight: 700;
       margin-bottom: 3px;
       display: block;
     }
     .custom-planner-select {
-      background-color: #090e1c !important;
-      color: #f8fafc !important;
-      color-scheme: dark !important;
-      border: 1px solid rgba(148, 163, 184, 0.24) !important;
+      background-color: #FFFFFF !important;
+      color: #172033 !important;
+      color-scheme: light !important;
+      border: 1px solid #D8E0EA !important;
       padding: 8px 16px;
       border-radius: 9px;
       font-weight: 600;
@@ -56,18 +56,18 @@
       transition: all 0.2s;
     }
     .custom-planner-select:focus {
-      border-color: var(--cyan) !important;
-      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18) !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 3px rgba(49, 87, 213, 0.1) !important;
     }
     .custom-planner-select option {
-      background-color: #090e1c !important;
-      color: #f8fafc !important;
+      background-color: #FFFFFF !important;
+      color: #172033 !important;
       padding: 9px 14px;
       font-size: 13.5px;
     }
     .custom-planner-select option:checked {
-      background-color: #0284c7 !important;
-      color: #ffffff !important;
+      background-color: var(--primary-light) !important;
+      color: var(--primary) !important;
       font-weight: 700;
     }
     .ribbon-meta-pill {
@@ -75,45 +75,43 @@
       align-items: center;
       gap: 10px;
       font-size: 12.5px;
-      color: var(--text-2);
-      background: rgba(10, 14, 28, 0.6);
+      color: var(--text-secondary);
+      background: #FFFFFF;
       padding: 7px 16px;
       border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
     }
-    .ribbon-meta-pill i { color: var(--cyan); }
+    .ribbon-meta-pill i { color: var(--primary); }
     .ribbon-regen-btn {
-      background: rgba(34, 211, 238, 0.08) !important;
-      border: 1px solid rgba(34, 211, 238, 0.28) !important;
-      color: #f8fafc !important;
+      background: #FFFFFF !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-primary) !important;
       font-weight: 600;
       transition: all 0.2s;
     }
     .ribbon-regen-btn:hover {
-      background: rgba(34, 211, 238, 0.16) !important;
-      border-color: var(--cyan) !important;
-      box-shadow: 0 0 14px rgba(34, 211, 238, 0.25) !important;
+      background: var(--bg-primary) !important;
+      border-color: #CBD5E1 !important;
       transform: translateY(-1px);
     }
 
     /* 3 Phase Columns with Distinct Identity */
     .phase-column {
-      background: linear-gradient(180deg, rgba(17, 24, 46, 0.78) 0%, rgba(10, 15, 30, 0.88) 100%);
-      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: #FFFFFF;
+      border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-sm);
       position: relative;
       overflow: hidden;
       transition: all 0.25s ease;
     }
     .phase-column:hover {
-      border-color: rgba(148, 163, 184, 0.26);
-      transform: translateY(-2px);
+      border-color: #CBD5E1;
+      box-shadow: var(--shadow-md);
     }
     .phase-column::before {
       content: '';
@@ -123,63 +121,61 @@
       opacity: 0.95;
     }
     .phase-col-before::before {
-      background: linear-gradient(90deg, #2563eb, #3b82f6);
-      box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+      background: var(--primary);
     }
     .phase-col-day::before {
-      background: linear-gradient(90deg, #f59e0b, #f97316);
-      box-shadow: 0 0 14px #f59e0b;
+      background: var(--warning);
     }
     .phase-col-after::before {
-      background: linear-gradient(90deg, #10b981, #059669);
-      box-shadow: 0 0 14px #10b981;
+      background: var(--success);
     }
     .phase-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-bottom: 14px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      border-bottom: 1px solid var(--border);
     }
     .phase-head h3 {
       font-size: 15.5px;
       font-weight: 700;
       letter-spacing: -0.01em;
+      color: var(--text-primary);
     }
 
     /* Task Card Enhancements */
     .task-card {
-      background: linear-gradient(135deg, rgba(16, 23, 44, 0.94) 0%, rgba(10, 15, 29, 0.98) 100%);
-      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: #FFFFFF;
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 14px 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.38);
+      box-shadow: var(--shadow-sm);
       position: relative;
     }
     .task-card:hover {
-      border-color: rgba(56, 189, 248, 0.38);
-      transform: translateY(-2.5px);
-      box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 16px rgba(34, 211, 238, 0.12);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
     .task-card.done {
-      opacity: 0.55;
-      background: rgba(10, 14, 26, 0.6);
-      border-color: rgba(16, 185, 129, 0.2);
+      opacity: 0.65;
+      background: var(--bg-secondary);
+      border-color: var(--border);
     }
     .task-card.done strong {
       text-decoration: line-through;
-      color: var(--text-2);
+      color: var(--text-muted);
     }
     .task-meta {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 11.5px;
-      color: var(--text-2);
+      color: var(--text-secondary);
       gap: 8px;
       flex-wrap: wrap;
     }
@@ -189,7 +185,7 @@
       gap: 5px;
     }
     .task-delete-btn {
-      color: var(--text-3);
+      color: var(--text-muted);
       font-size: 14px;
       cursor: pointer;
       background: none;
@@ -199,36 +195,35 @@
       transition: all 0.2s;
     }
     .task-delete-btn:hover {
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.12);
-      transform: scale(1.1);
+      color: var(--danger);
+      background: var(--danger-light);
     }
     #modalDeleteTaskId {
-      color-scheme: dark !important;
-      background-color: #0d1527 !important;
-      color: #f8fafc !important;
+      color-scheme: light !important;
+      background-color: #FFFFFF !important;
+      color: #172033 !important;
+      border: 1px solid #D8E0EA !important;
     }
     #modalDeleteTaskId option {
-      background-color: #0b1120 !important;
-      color: #f8fafc !important;
+      background-color: #FFFFFF !important;
+      color: #172033 !important;
       padding: 8px 12px;
     }
     #modalDeleteTaskId option:checked {
-      background-color: #0284c7 !important;
-      color: #ffffff !important;
+      background-color: var(--primary-light) !important;
+      color: var(--primary) !important;
       font-weight: 600;
     }
     .btn-danger-subtle {
-      color: #f87171 !important;
-      border: 1px solid rgba(239, 68, 68, 0.35) !important;
-      background: rgba(239, 68, 68, 0.08) !important;
+      color: var(--danger) !important;
+      border: 1px solid rgba(200, 60, 60, 0.35) !important;
+      background: var(--danger-light) !important;
       transition: all 0.2s ease;
     }
     .btn-danger-subtle:hover {
-      background: rgba(239, 68, 68, 0.22) !important;
-      border-color: #ef4444 !important;
-      color: #fee2e2 !important;
-      box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+      background: #FBD5D5 !important;
+      border-color: var(--danger) !important;
+      color: var(--danger) !important;
     }
   </style>
 </head>
@@ -499,7 +494,7 @@
         <div class="form-grid">
           <div class="field full">
             <label>Select Task to Delete</label>
-            <select id="modalDeleteTaskId" style="width:100%; padding:9px 12px; background:#0d1527; color:#f8fafc; color-scheme:dark; border:1px solid var(--border-strong); border-radius:8px; font-size:13px;">
+            <select id="modalDeleteTaskId" style="width:100%; padding:9px 12px; background:#FFFFFF; color:#172033; color-scheme:light; border:1px solid #D8E0EA; border-radius:8px; font-size:13px;">
               ${taskOptions}
             </select>
           </div>

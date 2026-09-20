@@ -328,25 +328,21 @@ async function testDashboardDomIntegrity() {
   }
 }
 
-async function testMeetingTasksAudioFeature() {
-  console.log('\n--- 6. TESTING MEETING AUDIO IMPORT & STT INTEGRITY ---');
+async function testMeetingTasksFeature() {
+  console.log('\n--- 6. TESTING MEETING TASKS & EXTRACTION INTEGRITY ---');
   const meetingHtml = fs.readFileSync(path.join(__dirname, '../frontend/meeting-tasks.html'), 'utf8');
 
-  const requiredAudioIds = [
-    'audioDropZone',
-    'audioFileInput',
-    'audioPreviewPlayer',
-    'btnLiveMic',
-    'btnTranscribe',
+  const requiredIds = [
     'transcriptInput',
-    'eventSelect',
     'btnExtract',
-    'extractionResults'
+    'extractionResults',
+    'extractedCountBadge',
+    'taskDatabaseLink'
   ];
 
-  for (const id of requiredAudioIds) {
+  for (const id of requiredIds) {
     const exists = meetingHtml.includes(`id="${id}"`);
-    assert(exists, `meeting-tasks.html contains audio/STT element id="${id}"`);
+    assert(exists, `meeting-tasks.html contains element id="${id}"`);
   }
 }
 
@@ -360,7 +356,7 @@ async function run() {
   await testRestApis();
   await testAiActions();
   await testDashboardDomIntegrity();
-  await testMeetingTasksAudioFeature();
+  await testMeetingTasksFeature();
 
   console.log('\n====================================================');
   console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

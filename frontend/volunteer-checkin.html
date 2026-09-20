@@ -121,7 +121,7 @@
         }
 
         container.innerHTML = pendingVols.map(v => `
-          <div style="background:rgba(10,14,26,0.7); border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);">
             <div>
               <strong style="color:var(--text-0); font-size:13px;">${ClubOps.escapeHtml(v.name)}</strong>
               <div style="color:var(--text-2); font-size:11.5px;">${ClubOps.escapeHtml(v.team)} • ${ClubOps.escapeHtml(v.role)}</div>
